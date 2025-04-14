@@ -13,6 +13,8 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProfileSetup from "./pages/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import HealthRecord from "./pages/HealthRecord";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +84,16 @@ const App = () => {
             <Route path="/dashboard" element={
               <RequireAuth>
                 <Dashboard />
+              </RequireAuth>
+            } />
+            <Route path="/profile" element={
+              <RequireAuth>
+                <Profile />
+              </RequireAuth>
+            } />
+            <Route path="/health-record" element={
+              <RequireAuth>
+                <HealthRecord />
               </RequireAuth>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
