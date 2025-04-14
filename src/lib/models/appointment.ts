@@ -84,28 +84,28 @@ export const specialties: Array<{value: MedicalSpecialty, label: string, descrip
   { value: 'Psychiatry', label: 'Psychiatry', description: 'Mental health disorders' },
   { value: 'Pulmonology', label: 'Pulmonology', description: 'Respiratory system diseases' },
   { value: 'Rheumatology', label: 'Rheumatology', description: 'Autoimmune and inflammatory disorders' },
-  { value: 'Urology', label: 'Urology', description: 'Urinary tract and reproductive health' },
+  { value: 'Urology', label: 'Urology', description: 'Urinary tract and reproductive health' }
 ];
 
 // Define provider types with descriptions
 export const providerTypes: Array<{value: ProviderType, label: string, description?: string}> = [
   { value: 'Doctor', label: 'Doctor', description: 'Medical doctor consultation' },
   { value: 'Therapist', label: 'Therapist', description: 'Mental health specialist' },
-  { value: 'Physiotherapist', label: 'Physiotherapist', description: 'Physical therapy specialist' },
+  { value: 'Physiotherapist', label: 'Physiotherapist', description: 'Physical therapy specialist' }
 ];
 
 // Define consultation types with descriptions
 export const consultationTypes: Array<{value: ConsultationType, label: string, description?: string}> = [
   { value: 'Urgent', label: 'Urgent', description: 'Immediate consultation with available provider' },
   { value: 'Scheduled', label: 'Scheduled', description: 'Book appointment for a future date and time' },
-  { value: 'Home Visit', label: 'Home Visit', description: 'Provider visits your location' },
+  { value: 'Home Visit', label: 'Home Visit', description: 'Provider visits your location' }
 ];
 
 // Define delivery methods with descriptions
 export const deliveryMethods: Array<{value: DeliveryMethod, label: string, description?: string}> = [
   { value: 'Text', label: 'Text Chat', description: 'Text-based consultation' },
   { value: 'Audio', label: 'Audio Call', description: 'Voice call consultation' },
-  { value: 'Video', label: 'Video Call', description: 'Video conference consultation' },
+  { value: 'Video', label: 'Video Call', description: 'Video conference consultation' }
 ];
 
 // Generate time slots for a given date
