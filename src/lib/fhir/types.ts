@@ -1,4 +1,3 @@
-
 /**
  * FHIR Resource Types
  * Based on FHIR R4 (v4.0.1) standards
@@ -345,5 +344,37 @@ export function toFhirMedicationStatement(
         ],
       },
     ],
+  };
+}
+
+// Convert lab test result data to FHIR Observation
+export function toFhirObservation(observationData: any, patientId: string): FhirObservation {
+  return {
+    resourceType: 'Observation',
+    id: observationData.id || undefined,
+    status: observationData.status || 'final',
+    category: observationData.category ? [
+      {
+        coding: [
+          {
+            system: "http://terminology.hl7.org/CodeSystem/observation-category",
+            code: "laboratory",
+            display: "Laboratory"
+          }
+        ]
+      }
+    ] : undefined,
+    code: observationData.code || {
+      coding: [],
+      text: observationData.testName || "Unknown Test"
+    },
+    subject: {
+      reference: `Patient/${patientId}`,
+      type: 'Patient'
+    },
+    effectiveDateTime: observationData.effectiveDateTime || new Date().toISOString(),
+    valueQuantity: observationData.valueQuantity,
+    valueString: observationData.valueString,
+    referenceRange: observationData.referenceRange
   };
 }
