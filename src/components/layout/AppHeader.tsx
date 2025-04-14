@@ -28,14 +28,14 @@ const AppHeader = ({
   };
   
   return (
-    <header className="sticky top-0 bg-white border-b border-slate-200 py-4 px-4 flex items-center justify-between z-40">
+    <header className="sticky top-0 bg-health-primary text-white border-b border-health-primary/20 py-4 px-4 flex items-center justify-between z-40">
       <div className="flex items-center">
         {showBackButton && (
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={handleBack}
-            className="mr-2"
+            className="mr-2 text-white hover:bg-health-primary/90"
           >
             <ArrowLeft size={20} />
           </Button>
@@ -44,7 +44,12 @@ const AppHeader = ({
       </div>
       
       {showNotification && (
-        <Button variant="ghost" size="icon" onClick={() => navigate("/notifications")}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigate("/notifications")}
+          className="text-white hover:bg-health-primary/90"
+        >
           <BellIcon size={20} />
         </Button>
       )}
