@@ -37,12 +37,16 @@ const SplashScreen = () => {
   }, []);
 
   const handleGetStarted = () => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    const hasCompletedProfile = localStorage.getItem("hasCompletedProfile");
+    // Set that the user has seen the splash screen
+    localStorage.setItem("hasSeenSplash", "true");
     
-    if (isAuthenticated === "true") {
-      if (hasCompletedProfile === "true") {
-        navigate("/");
+    // Check authentication status after setting hasSeenSplash
+    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    const hasCompletedProfile = localStorage.getItem("hasCompletedProfile") === "true";
+    
+    if (isAuthenticated) {
+      if (hasCompletedProfile) {
+        navigate("/dashboard");
       } else {
         navigate("/profile-setup");
       }
