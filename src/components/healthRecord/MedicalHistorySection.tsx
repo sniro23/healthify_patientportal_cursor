@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { Pencil, Plus, X, Search } from "lucide-react";
+import { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { commonConditions, searchConditions, ConditionOption } from "@/lib/data/conditions";
+import { toFhirCondition } from "@/lib/fhir/types";
 
 interface Condition {
   id: string;
@@ -60,6 +62,28 @@ const MedicalHistorySection = () => {
   const [newSurgery, setNewSurgery] = useState<Partial<Surgery>>({ name: "", year: new Date().getFullYear() });
   const [newAllergy, setNewAllergy] = useState<Partial<Allergy>>({ name: "", reaction: "" });
   
+  const [conditionSearchQuery, setConditionSearchQuery] = useState("");
+  const [conditionSearchResults, setConditionSearchResults] = useState<ConditionOption[]>([]);
+  const [selectedCondition, setSelectedCondition] = useState<ConditionOption | null>(null);
+  
+  useEffect(() => {
+    if (conditionSearchQuery.length >= 2) {
+      const results = searchConditions(conditionSearchQuery);
+      setConditionSearchResults(results);
+    } else {
+      setConditionSearchResults([]);
+    }
+  }, [conditionSearchQuery]);
+
+  const handleConditionSelect = (condition: ConditionOption) => {
+    setSelectedCondition(condition);
+    setNewCondition({
+      name: condition.name,
+      code: condition.code
+    });
+    setConditionSearchQuery("");
+  };
+  
   const handleAddCondition = () => {
     if (!newCondition.name) return;
     
@@ -77,7 +101,21 @@ const MedicalHistorySection = () => {
       conditions: updatedConditions
     });
     
+    // Convert to FHIR format (demonstration)
+    const fhirCondition = toFhirCondition(
+      {
+        id: `c${Date.now()}`,
+        name: newCondition.name,
+        code: newCondition.code
+      },
+      "patient-1" // Mock patient ID
+    );
+    
+    // Log FHIR data (in a real app this would be saved to the database)
+    console.log("FHIR Condition:", fhirCondition);
+    
     setNewCondition({ name: "" });
+    setSelectedCondition(null);
     
     toast({
       title: "Condition added",
@@ -273,7 +311,7 @@ const MedicalHistorySection = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {medicalHistory.conditions.map(condition => (
                     <Badge key={condition.id} variant="outline" className="py-1 px-3">
-                      {condition.name}
+                      {condition.name} {condition.code && <span className="text-xs opacity-60 ml-1">({condition.code})</span>}
                       <button 
                         className="ml-2 hover:text-red-500"
                         onClick={() => handleRemoveCondition(condition.id)}
@@ -282,6 +320,45 @@ const MedicalHistorySection = () => {
                       </button>
                     </Badge>
                   ))}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="conditionSearch">Search Condition</Label>
+                  <div className="relative">
+                    <Input 
+                      id="conditionSearch" 
+                      value={conditionSearchQuery}
+                      onChange={(e) => setConditionSearchQuery(e.target.value)}
+                      placeholder="Start typing to search conditions"
+                      className="pr-10"
+                    />
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                  
+                  {conditionSearchResults.length > 0 && conditionSearchQuery.length >= 2 && (
+                    <div className="absolute z-10 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                      {conditionSearchResults.map((condition) => (
+                        <div 
+                          key={condition.id} 
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleConditionSelect(condition)}
+                        >
+                          <div className="font-medium">{condition.name}</div>
+                          {condition.code && (
+                            <div className="text-xs text-gray-500">ICD-10: {condition.code}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="text-xs text-gray-500 mt-1">
+                    {selectedCondition ? (
+                      <span>Selected: {selectedCondition.name} (ICD-10: {selectedCondition.code})</span>
+                    ) : (
+                      <span>Type at least 2 characters to search common conditions</span>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
