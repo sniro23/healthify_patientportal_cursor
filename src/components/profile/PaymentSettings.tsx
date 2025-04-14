@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { 
   CreditCard, 
-  Bank, 
+  Landmark, 
   Calendar, 
   FileText, 
   ArrowUpDown, 
@@ -125,7 +125,7 @@ const PaymentSettings = () => {
       case 'card':
         return <CreditCard className="w-4 h-4" />;
       case 'bank':
-        return <Bank className="w-4 h-4" />;
+        return <Landmark className="w-4 h-4" />;
       default:
         return null;
     }
@@ -155,7 +155,7 @@ const PaymentSettings = () => {
             <h3 className="text-sm font-medium text-slate-700">Current Plan</h3>
             <div className="flex items-center mt-1">
               <span className="text-lg font-semibold mr-2">Plan {currentPlan.toUpperCase()}</span>
-              <SubscriptionBadge plan={currentPlan} />
+              <SubscriptionBadge tier={currentPlan} />
             </div>
             <p className="text-sm text-slate-500 mt-1">Renews on April 15, 2025</p>
           </div>
@@ -178,7 +178,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium flex items-center">
-                        Plan A <SubscriptionBadge plan="a" className="ml-2" />
+                        Plan A <SubscriptionBadge tier="a" className="ml-2" />
                       </h3>
                       <p className="text-sm text-slate-500">Premium features + priority support</p>
                     </div>
@@ -193,7 +193,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium flex items-center">
-                        Plan B <SubscriptionBadge plan="b" className="ml-2" />
+                        Plan B <SubscriptionBadge tier="b" className="ml-2" />
                       </h3>
                       <p className="text-sm text-slate-500">Advanced features</p>
                     </div>
@@ -208,7 +208,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium flex items-center">
-                        Plan C <SubscriptionBadge plan="c" className="ml-2" />
+                        Plan C <SubscriptionBadge tier="c" className="ml-2" />
                       </h3>
                       <p className="text-sm text-slate-500">Basic features</p>
                     </div>
@@ -223,7 +223,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium flex items-center">
-                        Plan D <SubscriptionBadge plan="d" className="ml-2" />
+                        Plan D <SubscriptionBadge tier="d" className="ml-2" />
                       </h3>
                       <p className="text-sm text-slate-500">Limited features</p>
                     </div>
@@ -238,7 +238,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium flex items-center">
-                        Free Tier <SubscriptionBadge plan="free" className="ml-2" />
+                        Free Tier <SubscriptionBadge tier="free" className="ml-2" />
                       </h3>
                       <p className="text-sm text-slate-500">Basic access with limitations</p>
                     </div>
@@ -295,7 +295,7 @@ const PaymentSettings = () => {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="bank" id="bank" />
                     <Label htmlFor="bank" className="flex items-center">
-                      <Bank className="w-4 h-4 mr-2" /> Bank Transfer
+                      <Landmark className="w-4 h-4 mr-2" /> Bank Transfer
                     </Label>
                   </div>
                 </div>
