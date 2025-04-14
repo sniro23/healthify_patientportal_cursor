@@ -16,6 +16,16 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import HealthRecord from "./pages/HealthRecord";
 
+// Appointment pages
+import BookAppointment from "./pages/appointments/BookAppointment";
+import UrgentConsultation from "./pages/appointments/UrgentConsultation";
+import ScheduledConsultation from "./pages/appointments/ScheduledConsultation";
+import HomeVisit from "./pages/appointments/HomeVisit";
+import Payment from "./pages/appointments/Payment";
+import Confirmation from "./pages/appointments/Confirmation";
+import AppointmentHistory from "./pages/appointments/AppointmentHistory";
+import AppointmentDetails from "./pages/appointments/AppointmentDetails";
+
 const queryClient = new QueryClient();
 
 // Auth guard component to protect routes
@@ -96,6 +106,49 @@ const App = () => {
                 <HealthRecord />
               </RequireAuth>
             } />
+            
+            {/* Appointment Routes */}
+            <Route path="/appointments/book" element={
+              <RequireAuth>
+                <BookAppointment />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/urgent" element={
+              <RequireAuth>
+                <UrgentConsultation />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/scheduled" element={
+              <RequireAuth>
+                <ScheduledConsultation />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/home-visit" element={
+              <RequireAuth>
+                <HomeVisit />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/payment" element={
+              <RequireAuth>
+                <Payment />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/confirmation" element={
+              <RequireAuth>
+                <Confirmation />
+              </RequireAuth>
+            } />
+            <Route path="/appointments" element={
+              <RequireAuth>
+                <AppointmentHistory />
+              </RequireAuth>
+            } />
+            <Route path="/appointments/:id" element={
+              <RequireAuth>
+                <AppointmentDetails />
+              </RequireAuth>
+            } />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
