@@ -1,4 +1,3 @@
-
 /**
  * FHIR Appointment Resource Type
  * Based on FHIR R4 (v4.0.1) standards
@@ -39,7 +38,7 @@ export function toFhirAppointment(
         reference: `Patient/${patientId}`,
         type: 'Patient'
       },
-      status: 'accepted' as const
+      status: 'accepted'
     }
   ];
 
@@ -50,7 +49,7 @@ export function toFhirAppointment(
         reference: `Practitioner/${practitionerId}`,
         type: 'Practitioner'
       },
-      status: (appointmentData.practitionerStatus || 'needs-action') as 'accepted' | 'declined' | 'tentative' | 'needs-action'
+      status: appointmentData.practitionerStatus || 'needs-action'
     });
   }
 
