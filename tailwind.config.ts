@@ -63,12 +63,12 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Healthcare-focused color palette
+				// Healthcare-focused color palette - Updated with new accent colors
 				health: {
-					primary: '#0EA5E9', // Primary blue
-					secondary: '#2DD4BF', // Teal accent
-					accent: '#0369A1', // Dark blue
-					highlight: '#ECFEFF', // Super light teal background
+					primary: '#9D5A8F', // New primary accent color
+					secondary: '#2DD4BF', // Keep teal accent
+					accent: '#1A668C', // New button color
+					highlight: '#F6EFF5', // Light purple background
 					warning: '#FEF3C7', // Light warning background
 					success: '#D1FAE5', // Light success background
 					error: '#FEE2E2', // Light error background

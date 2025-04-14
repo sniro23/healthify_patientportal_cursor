@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import OnboardingSlide from "@/components/auth/OnboardingSlide";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const slides = [
   {
@@ -26,6 +27,7 @@ const slides = [
 const SplashScreen = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Auto-advance slides
   useEffect(() => {
@@ -69,7 +71,10 @@ const SplashScreen = () => {
         ))}
       </div>
       
-      <div className="p-6 flex flex-col items-center">
+      <div className={cn(
+        "p-6 flex flex-col items-center",
+        isMobile ? "pb-10" : ""
+      )}>
         <div className="flex justify-center space-x-2 mb-6">
           {slides.map((_, index) => (
             <button
@@ -85,7 +90,7 @@ const SplashScreen = () => {
         </div>
         
         <Button
-          className="w-full bg-health-primary hover:bg-health-accent"
+          className="w-full bg-health-accent hover:bg-health-accent/90 text-white"
           onClick={handleGetStarted}
         >
           Get Started
