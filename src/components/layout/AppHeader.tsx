@@ -30,7 +30,7 @@ const AppHeader = ({
   return (
     <header className="sticky top-0 bg-health-primary text-white border-b border-health-primary/20 py-4 px-4 flex items-center justify-between z-40">
       <div className="flex items-center">
-        {showBackButton && (
+        {showBackButton ? (
           <Button 
             variant="ghost" 
             size="icon" 
@@ -39,6 +39,14 @@ const AppHeader = ({
           >
             <ArrowLeft size={20} />
           </Button>
+        ) : (
+          <div className="flex items-center mr-3">
+            <img 
+              src="/lovable-uploads/42236a42-4245-4b89-8aa3-94a6d886e6ce.png" 
+              alt="Healthify Logo" 
+              className="h-6 mr-2" 
+            />
+          </div>
         )}
         <h1 className="text-lg font-semibold">{title}</h1>
       </div>
