@@ -1,12 +1,40 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+// This page now redirects to dashboard or onboarding flows
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Check if user has seen splash screen
+    const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+    
+    if (!hasSeenSplash) {
+      localStorage.setItem("hasSeenSplash", "true");
+      navigate("/splash");
+    } else {
+      // Check if user is authenticated
+      const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+      
+      if (isAuthenticated) {
+        // Check if profile setup is complete
+        const hasCompletedProfile = localStorage.getItem("hasCompletedProfile") === "true";
+        
+        if (hasCompletedProfile) {
+          navigate("/dashboard");
+        } else {
+          navigate("/profile-setup");
+        }
+      } else {
+        navigate("/login");
+      }
+    }
+  }, [navigate]);
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="animate-pulse-glow text-health-primary">Loading...</div>
     </div>
   );
 };
