@@ -1,12 +1,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Home, Loader2, User, Users, MessageCircle, Phone, Video } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ProviderType, 
@@ -21,6 +20,7 @@ const BookAppointment = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isHomeVisitLoading, setIsHomeVisitLoading] = useState(false);
   
   // Selection states
   const [providerType, setProviderType] = useState<ProviderType | "">("");
@@ -30,26 +30,26 @@ const BookAppointment = () => {
   // Subscription logic (mock)
   const isSubscriber = localStorage.getItem("isSubscriber") === "true";
 
-  // Convert provider types to combobox options
-  const providerOptions: ComboboxOption[] = providerTypes.map(type => ({
-    value: type.value,
-    label: type.label,
-    description: type.description
-  }));
+  // Provider icon mapping
+  const getProviderIcon = (type: ProviderType | string) => {
+    switch(type) {
+      case 'Doctor': return <User className="h-5 w-5" />;
+      case 'Physiotherapist': return <User className="h-5 w-5" />;
+      case 'Mental Health Therapist': return <Users className="h-5 w-5" />;
+      case 'Life Coach': return <User className="h-5 w-5" />;
+      default: return <User className="h-5 w-5" />;
+    }
+  };
 
-  // Convert consultation types to combobox options
-  const consultationOptions: ComboboxOption[] = consultationTypes.map(type => ({
-    value: type.value,
-    label: type.label,
-    description: type.description
-  }));
-
-  // Convert delivery methods to combobox options
-  const deliveryOptions: ComboboxOption[] = deliveryMethods.map(method => ({
-    value: method.value,
-    label: method.label,
-    description: method.description
-  }));
+  // Delivery method icon mapping
+  const getDeliveryIcon = (method: DeliveryMethod | string) => {
+    switch(method) {
+      case 'Audio': return <Phone className="h-5 w-5" />;
+      case 'Video': return <Video className="h-5 w-5" />;
+      case 'Text': return <MessageCircle className="h-5 w-5" />;
+      default: return null;
+    }
+  };
 
   // Handle the "Next" button click
   const handleNext = () => {
@@ -78,9 +78,6 @@ const BookAppointment = () => {
         case "Scheduled":
           nextPage = "/appointments/scheduled";
           break;
-        case "Home Visit":
-          nextPage = "/appointments/home-visit";
-          break;
       }
       
       // Navigate to the appropriate page with the selection as state
@@ -91,6 +88,20 @@ const BookAppointment = () => {
           deliveryMethod,
           isSubscriber
         } 
+      });
+    }, 500);
+  };
+
+  // Handle home visit button click
+  const handleHomeVisit = () => {
+    setIsHomeVisitLoading(true);
+    
+    setTimeout(() => {
+      setIsHomeVisitLoading(false);
+      navigate("/appointments/home-visit", {
+        state: {
+          isSubscriber
+        }
       });
     }, 500);
   };
@@ -107,7 +118,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Provider Type</label>
                 <Combobox
-                  options={providerOptions}
+                  options={providerTypes}
                   value={providerType}
                   onSelect={(value) => setProviderType(value as ProviderType)}
                   placeholder="Select provider type"
@@ -118,7 +129,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Consultation Type</label>
                 <Combobox
-                  options={consultationOptions}
+                  options={consultationTypes}
                   value={consultationType}
                   onSelect={(value) => setConsultationType(value as ConsultationType)}
                   placeholder="Select consultation type"
@@ -129,7 +140,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Delivery Method</label>
                 <Combobox
-                  options={deliveryOptions}
+                  options={deliveryMethods}
                   value={deliveryMethod}
                   onSelect={(value) => setDeliveryMethod(value as DeliveryMethod)}
                   placeholder="Select delivery method"
@@ -150,6 +161,34 @@ const BookAppointment = () => {
                 ) : "Next"}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+        
+        {/* Separate Home Visit CTA Button */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center mb-4">
+              <p className="text-lg font-medium">Need a home visit?</p>
+              <p className="text-sm text-muted-foreground">Get healthcare services in the comfort of your home</p>
+            </div>
+            <Button 
+              variant="accent" 
+              className="w-full" 
+              onClick={handleHomeVisit}
+              disabled={isHomeVisitLoading}
+            >
+              {isHomeVisitLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Home className="mr-2 h-5 w-5" />
+                  Book a Home Visit
+                </>
+              )}
+            </Button>
           </CardContent>
         </Card>
         

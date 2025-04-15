@@ -4,10 +4,10 @@
  */
 
 // Provider Types
-export type ProviderType = 'Doctor' | 'Therapist' | 'Physiotherapist';
+export type ProviderType = 'Doctor' | 'Physiotherapist' | 'Mental Health Therapist' | 'Life Coach';
 
 // Consultation Types
-export type ConsultationType = 'Urgent' | 'Scheduled' | 'Home Visit';
+export type ConsultationType = 'Urgent' | 'Scheduled';
 
 // Delivery Method
 export type DeliveryMethod = 'Text' | 'Audio' | 'Video';
@@ -90,15 +90,15 @@ export const specialties: Array<{value: MedicalSpecialty, label: string, descrip
 // Define provider types with descriptions
 export const providerTypes: Array<{value: ProviderType, label: string, description?: string}> = [
   { value: 'Doctor', label: 'Doctor', description: 'Medical doctor consultation' },
-  { value: 'Therapist', label: 'Therapist', description: 'Mental health specialist' },
-  { value: 'Physiotherapist', label: 'Physiotherapist', description: 'Physical therapy specialist' }
+  { value: 'Physiotherapist', label: 'Physiotherapist', description: 'Physical therapy specialist' },
+  { value: 'Mental Health Therapist', label: 'Mental Health Therapist', description: 'Mental health counseling and therapy' },
+  { value: 'Life Coach', label: 'Life Coach', description: 'Personal development and goal achievement' }
 ];
 
 // Define consultation types with descriptions
 export const consultationTypes: Array<{value: ConsultationType, label: string, description?: string}> = [
   { value: 'Urgent', label: 'Urgent', description: 'Immediate consultation with available provider' },
-  { value: 'Scheduled', label: 'Scheduled', description: 'Book appointment for a future date and time' },
-  { value: 'Home Visit', label: 'Home Visit', description: 'Provider visits your location' }
+  { value: 'Scheduled', label: 'Scheduled', description: 'Book appointment for a future date and time' }
 ];
 
 // Define delivery methods with descriptions
