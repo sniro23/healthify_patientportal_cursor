@@ -50,3 +50,23 @@ export function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+// Function to simulate generating an invoice PDF
+export function generateInvoicePDF(invoiceId: string): Promise<Blob> {
+  return new Promise((resolve) => {
+    // This would be replaced with actual PDF generation logic
+    setTimeout(() => {
+      // In a real app, this would return a Blob representing a PDF
+      const dummyBlob = new Blob(['Invoice PDF content'], { type: 'application/pdf' });
+      resolve(dummyBlob);
+    }, 1000);
+  });
+}
+
+// Function to format currency with given currency code
+export function formatCurrency(amount: number, currencyCode: string = 'LKR'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 2
+  }).format(amount);
+}

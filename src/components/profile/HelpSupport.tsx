@@ -1,169 +1,240 @@
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { 
-  HelpCircle, 
-  MessageCircle, 
-  Send, 
-  ChevronRight 
-} from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const supportFormSchema = z.object({
+  category: z.string().min(1, "Please select a category"),
+  subject: z.string().min(3, "Subject should be at least 3 characters"),
+  description: z.string().min(10, "Description should be at least 10 characters")
+});
+
+type SupportFormValues = z.infer<typeof supportFormSchema>;
 
 interface FAQ {
+  id: string;
   question: string;
   answer: string;
 }
 
 const HelpSupport = () => {
   const { toast } = useToast();
-  const [isSending, setIsSending] = useState(false);
-  const [supportMessage, setSupportMessage] = useState("");
-  const [subject, setSubject] = useState("");
-  const [liveChatEnabled, setLiveChatEnabled] = useState(false);
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("faq");
+
+  const form = useForm<SupportFormValues>({
+    resolver: zodResolver(supportFormSchema),
+    defaultValues: {
+      category: "",
+      subject: "",
+      description: ""
+    }
+  });
+
   const faqs: FAQ[] = [
     {
-      question: "How do I reschedule an appointment?",
-      answer: "To reschedule an appointment, navigate to the Appointments section, select the appointment you wish to change, and tap on the 'Reschedule' button. You'll be prompted to select a new date and time."
+      id: "faq-1",
+      question: "How do I book an appointment?",
+      answer: "You can book an appointment by navigating to the Appointments section from the bottom navigation bar. From there, select the type of appointment you need and follow the on-screen instructions."
     },
     {
-      question: "How can I view my medical records?",
-      answer: "Your medical records are available in the Health Records section. You can view test results, prescriptions, and visit summaries. For older records, you may need to request them specifically from your healthcare provider."
+      id: "faq-2",
+      question: "How do I update my personal information?",
+      answer: "You can update your personal information in the Profile section. Go to App Settings tab and you'll find options to update your name, date of birth, gender, and other personal details."
     },
     {
-      question: "How do I update my insurance information?",
-      answer: "To update your insurance details, go to Profile > Payment Settings > Insurance Information. You can add new insurance policies, update existing ones, or set a primary insurance provider."
+      id: "faq-3",
+      question: "How do I view my medical records?",
+      answer: "Your medical records can be accessed from the Health Records section in the bottom navigation bar. There you can view your medical history, lab results, and other health information."
     },
     {
-      question: "Can I share my health records with a new doctor?",
-      answer: "Yes, you can share your health records with other healthcare providers. In the Health Records section, select the records you want to share, tap the 'Share' button, and choose how you'd like to send them (email, direct share, or download PDF)."
+      id: "faq-4",
+      question: "How do I change my subscription plan?",
+      answer: "To change your subscription plan, go to the Profile section, then select the Payment tab. There you'll find options to view and modify your current subscription plan."
+    },
+    {
+      id: "faq-5",
+      question: "How do I add a new medication to my list?",
+      answer: "You can add a new medication by going to the Medications section in the bottom navigation bar and selecting 'Add Medication'. Fill out the required information and save it to your list."
     }
   ];
-  
-  const handleSubmitSupport = () => {
-    if (!subject.trim() || !supportMessage.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please provide both a subject and message",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsSending(true);
+
+  const filteredFAQs = searchQuery ? 
+    faqs.filter(faq => 
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    ) : faqs;
+
+  const onSubmit = (data: SupportFormValues) => {
+    setIsSubmitting(true);
     
     // Simulate API call
     setTimeout(() => {
-      console.log("Support ticket submitted:", { subject, message: supportMessage });
-      setIsSending(false);
-      setSupportMessage("");
-      setSubject("");
+      console.log("Support ticket submitted:", data);
+      setIsSubmitting(false);
+      
+      form.reset();
       
       toast({
-        title: "Support ticket created",
-        description: "We'll respond to your inquiry as soon as possible",
+        title: "Support ticket submitted",
+        description: "We'll get back to you as soon as possible.",
       });
-    }, 800);
+    }, 1500);
   };
-  
-  const handleToggleLiveChat = () => {
-    setLiveChatEnabled(!liveChatEnabled);
-    
-    toast({
-      title: liveChatEnabled ? "Live chat disabled" : "Live chat enabled",
-      description: liveChatEnabled 
-        ? "Live chat support is now turned off" 
-        : "Live chat support is now available",
-    });
-  };
-  
+
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6">
       <h2 className="text-lg font-semibold mb-4">Help & Support</h2>
       
-      {/* FAQ Section */}
-      <div className="mb-8">
-        <h3 className="text-sm font-medium mb-3 flex items-center">
-          <HelpCircle className="w-4 h-4 mr-2" /> 
-          Frequently Asked Questions
-        </h3>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="faq">FAQs</TabsTrigger>
+          <TabsTrigger value="contact">Contact Us</TabsTrigger>
+        </TabsList>
         
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`faq-${index}`}>
-              <AccordionTrigger className="text-left">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-slate-600">{faq.answer}</p>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-        
-        <Button variant="link" className="mt-2 p-0 text-health-accent">
-          View all FAQs <ChevronRight className="w-4 h-4 ml-1" />
-        </Button>
-      </div>
-      
-      {/* Support Ticket */}
-      <div className="mb-6">
-        <h3 className="text-sm font-medium mb-3 flex items-center">
-          <MessageCircle className="w-4 h-4 mr-2" /> 
-          Submit a Support Ticket
-        </h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="subject" className="block text-sm font-medium mb-1">Subject</label>
+        <TabsContent value="faq" className="space-y-4">
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input 
-              id="subject"
-              placeholder="Briefly describe your issue"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Search for questions or topics..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
             />
           </div>
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium mb-1">Message</label>
-            <Textarea 
-              id="message"
-              placeholder="Please provide details about your issue or question"
-              rows={4}
-              value={supportMessage}
-              onChange={(e) => setSupportMessage(e.target.value)}
-            />
-          </div>
-        </div>
+          
+          {filteredFAQs.length > 0 ? (
+            <Accordion type="single" collapsible className="w-full">
+              {filteredFAQs.map((faq) => (
+                <AccordionItem key={faq.id} value={faq.id}>
+                  <AccordionTrigger className="text-left font-medium">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-slate-600">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <p>No results found for "{searchQuery}"</p>
+              <p className="mt-2 text-sm">Try using different keywords or browse our FAQs above</p>
+            </div>
+          )}
+        </TabsContent>
         
-        <Button 
-          onClick={handleSubmitSupport} 
-          className="mt-4"
-          disabled={isSending}
-        >
-          {isSending ? "Sending..." : "Submit Ticket"}
-          {!isSending && <Send className="w-4 h-4 ml-2" />}
-        </Button>
-      </div>
-      
-      {/* Live Chat Option */}
-      <div className="pt-4 border-t">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium">Live Chat Support</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Enable to get instant support from our team
-            </p>
-          </div>
-          <Switch
-            checked={liveChatEnabled}
-            onCheckedChange={handleToggleLiveChat}
-          />
-        </div>
-      </div>
+        <TabsContent value="contact">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit a Support Ticket</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="technical">Technical Issue</SelectItem>
+                            <SelectItem value="billing">Billing Question</SelectItem>
+                            <SelectItem value="appointment">Appointment Help</SelectItem>
+                            <SelectItem value="account">Account Management</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="subject"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Subject</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Brief description of your issue" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Please provide details about your issue or question..." 
+                            className="min-h-[120px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Include as much detail as possible to help us assist you better.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Submitting..." : "Submit Ticket"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
