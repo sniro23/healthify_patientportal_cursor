@@ -118,7 +118,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Provider Type</label>
                 <Combobox
-                  options={providerTypes}
+                  options={providerTypes || []}
                   value={providerType}
                   onSelect={(value) => setProviderType(value as ProviderType)}
                   placeholder="Select provider type"
@@ -129,7 +129,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Consultation Type</label>
                 <Combobox
-                  options={consultationTypes}
+                  options={consultationTypes || []}
                   value={consultationType}
                   onSelect={(value) => setConsultationType(value as ConsultationType)}
                   placeholder="Select consultation type"
@@ -140,7 +140,7 @@ const BookAppointment = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Delivery Method</label>
                 <Combobox
-                  options={deliveryMethods}
+                  options={deliveryMethods || []}
                   value={deliveryMethod}
                   onSelect={(value) => setDeliveryMethod(value as DeliveryMethod)}
                   placeholder="Select delivery method"

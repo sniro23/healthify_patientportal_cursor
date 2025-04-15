@@ -88,7 +88,7 @@ export const specialties: Array<{value: MedicalSpecialty, label: string, descrip
 ];
 
 // Define provider types with descriptions
-export const providerTypes: Array<{value: ProviderType, label: string, description?: string}> = [
+export const providerTypes = [
   { value: 'Doctor', label: 'Doctor', description: 'Medical doctor consultation' },
   { value: 'Physiotherapist', label: 'Physiotherapist', description: 'Physical therapy specialist' },
   { value: 'Mental Health Therapist', label: 'Mental Health Therapist', description: 'Mental health counseling and therapy' },
@@ -96,13 +96,13 @@ export const providerTypes: Array<{value: ProviderType, label: string, descripti
 ];
 
 // Define consultation types with descriptions
-export const consultationTypes: Array<{value: ConsultationType, label: string, description?: string}> = [
+export const consultationTypes = [
   { value: 'Urgent', label: 'Urgent', description: 'Immediate consultation with available provider' },
   { value: 'Scheduled', label: 'Scheduled', description: 'Book appointment for a future date and time' }
 ];
 
 // Define delivery methods with descriptions
-export const deliveryMethods: Array<{value: DeliveryMethod, label: string, description?: string}> = [
+export const deliveryMethods = [
   { value: 'Text', label: 'Text Chat', description: 'Text-based consultation' },
   { value: 'Audio', label: 'Audio Call', description: 'Voice call consultation' },
   { value: 'Video', label: 'Video Call', description: 'Video conference consultation' }
