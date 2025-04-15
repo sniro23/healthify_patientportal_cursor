@@ -1,73 +1,138 @@
-# Welcome to your Lovable project
+# Healthify Patient Portal
 
-## Project info
+A modern patient portal for managing medical appointments and healthcare services.
 
-**URL**: https://lovable.dev/projects/a4683889-0d57-44a0-ad69-159d09548163
+## Features
 
-## How can I edit this code?
+- Appointment booking system
+- Home visit scheduling
+- Real-time availability checking
+- Secure authentication
+- Responsive design
 
-There are several ways of editing your application.
+## Prerequisites
 
-**Use Lovable**
+- Node.js 18.x or later
+- npm or yarn
+- Supabase account
+- Google OAuth credentials
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a4683889-0d57-44a0-ad69-159d09548163) and start prompting.
+## Environment Variables
 
-Changes made via Lovable will be committed automatically to this repo.
+Create a `.env` file in the root directory with the following variables:
 
-**Use your preferred IDE**
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
 ```
 
-**Edit a file directly in GitHub**
+## Local Development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/healthify-patient-portal.git
+cd healthify-patient-portal
+```
 
-**Use GitHub Codespaces**
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. Run the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-## What technologies are used for this project?
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Option 1: Deploy to Vercel
 
-## How can I deploy this project?
+1. Push your code to GitHub:
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/yourusername/healthify-patient-portal.git
+git push -u origin main
+```
 
-Simply open [Lovable](https://lovable.dev/projects/a4683889-0d57-44a0-ad69-159d09548163) and click on Share -> Publish.
+2. Go to [Vercel](https://vercel.com) and sign in with your GitHub account.
 
-## Can I connect a custom domain to my Lovable project?
+3. Click "New Project" and import your repository.
 
-Yes, you can!
+4. Configure the environment variables in Vercel's project settings:
+   - Add all the environment variables from your `.env` file
+   - For `NEXTAUTH_URL`, use your Vercel deployment URL
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+5. Click "Deploy"
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Option 2: Deploy to GitHub Pages
+
+1. Install the `gh-pages` package:
+```bash
+npm install gh-pages --save-dev
+# or
+yarn add gh-pages --dev
+```
+
+2. Update `package.json`:
+```json
+{
+  "scripts": {
+    "deploy": "gh-pages -d out"
+  }
+}
+```
+
+3. Build the project:
+```bash
+npm run build
+# or
+yarn build
+```
+
+4. Deploy to GitHub Pages:
+```bash
+npm run deploy
+# or
+yarn deploy
+```
+
+## Database Setup
+
+1. Create a new Supabase project at [supabase.com](https://supabase.com)
+
+2. Run the database migrations:
+   - Go to your Supabase project dashboard
+   - Navigate to SQL Editor
+   - Copy and paste the contents of `supabase/migrations/20240320000000_create_appointments.sql`
+   - Run the SQL script
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
