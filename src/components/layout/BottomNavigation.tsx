@@ -1,5 +1,5 @@
 
-import { Home, FileText, MessageCircle, User } from "lucide-react";
+import { Home, FileText, MessageCircle, User, Pill } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const BottomNavigation = () => {
@@ -10,6 +10,7 @@ const BottomNavigation = () => {
     if (path === "/dashboard" && currentPath === "/dashboard") return true;
     if (path === "/health-record" && currentPath === "/health-record") return true;
     if (path === "/chat" && (currentPath === "/chat" || currentPath.startsWith("/chat/"))) return true;
+    if (path === "/medications" && (currentPath === "/medications" || currentPath.startsWith("/medications/"))) return true;
     if (path === "/profile" && currentPath === "/profile") return true;
     return false;
   };
@@ -30,6 +31,14 @@ const BottomNavigation = () => {
       >
         <FileText size={20} />
         <span className="text-xs mt-1">Records</span>
+      </Link>
+      
+      <Link 
+        to="/medications" 
+        className={`flex flex-col items-center ${isActive("/medications") ? "text-white" : "text-white/70"}`}
+      >
+        <Pill size={20} />
+        <span className="text-xs mt-1">Meds</span>
       </Link>
       
       <Link 

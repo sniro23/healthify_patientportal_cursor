@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,6 +32,11 @@ import WaitingForDoctorPage from "./pages/chat/WaitingForDoctorPage";
 import ChatSessionPage from "./pages/chat/ChatSessionPage";
 import ChatEndedPage from "./pages/chat/ChatEndedPage";
 import VisitSummaryPage from "./pages/consultations/VisitSummaryPage";
+
+// Medication pages
+import MedicationSummary from "./pages/medications/MedicationSummary";
+import AddMedication from "./pages/medications/AddMedication";
+import PrescriptionDetails from "./pages/medications/PrescriptionDetails";
 
 const queryClient = new QueryClient();
 
@@ -72,7 +76,6 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Simulate initialization
     setTimeout(() => {
       setIsLoading(false);
     }, 500);
@@ -186,6 +189,23 @@ const App = () => {
             <Route path="/consultations/summary/:summaryId" element={
               <RequireAuth>
                 <VisitSummaryPage />
+              </RequireAuth>
+            } />
+            
+            {/* Medication Routes */}
+            <Route path="/medications" element={
+              <RequireAuth>
+                <MedicationSummary />
+              </RequireAuth>
+            } />
+            <Route path="/medications/add" element={
+              <RequireAuth>
+                <AddMedication />
+              </RequireAuth>
+            } />
+            <Route path="/medications/prescription/:prescriptionId" element={
+              <RequireAuth>
+                <PrescriptionDetails />
               </RequireAuth>
             } />
             
