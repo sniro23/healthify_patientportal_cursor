@@ -26,6 +26,14 @@ import Confirmation from "./pages/appointments/Confirmation";
 import AppointmentHistory from "./pages/appointments/AppointmentHistory";
 import AppointmentDetails from "./pages/appointments/AppointmentDetails";
 
+// Chat/Consultation pages
+import ChatOverviewPage from "./pages/chat/ChatOverviewPage";
+import NewChatPage from "./pages/chat/NewChatPage";
+import WaitingForDoctorPage from "./pages/chat/WaitingForDoctorPage";
+import ChatSessionPage from "./pages/chat/ChatSessionPage";
+import ChatEndedPage from "./pages/chat/ChatEndedPage";
+import VisitSummaryPage from "./pages/consultations/VisitSummaryPage";
+
 const queryClient = new QueryClient();
 
 // Auth guard component to protect routes
@@ -146,6 +154,38 @@ const App = () => {
             <Route path="/appointments/:id" element={
               <RequireAuth>
                 <AppointmentDetails />
+              </RequireAuth>
+            } />
+
+            {/* Chat Routes */}
+            <Route path="/chat" element={
+              <RequireAuth>
+                <ChatOverviewPage />
+              </RequireAuth>
+            } />
+            <Route path="/chat/new" element={
+              <RequireAuth>
+                <NewChatPage />
+              </RequireAuth>
+            } />
+            <Route path="/chat/waiting" element={
+              <RequireAuth>
+                <WaitingForDoctorPage />
+              </RequireAuth>
+            } />
+            <Route path="/chat/:chatId" element={
+              <RequireAuth>
+                <ChatSessionPage />
+              </RequireAuth>
+            } />
+            <Route path="/chat/:chatId/ended" element={
+              <RequireAuth>
+                <ChatEndedPage />
+              </RequireAuth>
+            } />
+            <Route path="/consultations/summary/:summaryId" element={
+              <RequireAuth>
+                <VisitSummaryPage />
               </RequireAuth>
             } />
             

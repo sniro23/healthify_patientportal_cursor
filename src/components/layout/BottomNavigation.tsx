@@ -9,7 +9,7 @@ const BottomNavigation = () => {
   const isActive = (path: string) => {
     if (path === "/dashboard" && currentPath === "/dashboard") return true;
     if (path === "/health-record" && currentPath === "/health-record") return true;
-    if (path === "/chat" && currentPath === "/chat") return true;
+    if (path === "/chat" && (currentPath === "/chat" || currentPath.startsWith("/chat/"))) return true;
     if (path === "/profile" && currentPath === "/profile") return true;
     return false;
   };
