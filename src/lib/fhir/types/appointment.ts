@@ -1,3 +1,4 @@
+
 /**
  * FHIR Appointment Resource Type
  * Based on FHIR R4 (v4.0.1) standards
@@ -5,6 +6,9 @@
  */
 
 import { FhirResource, FhirReference, FhirCodeableConcept } from './base';
+
+// Participant status type
+type ParticipantStatus = 'accepted' | 'declined' | 'tentative' | 'needs-action';
 
 // Appointment FHIR Resource
 export interface FhirAppointment extends FhirResource {
@@ -20,7 +24,7 @@ export interface FhirAppointment extends FhirResource {
   comment?: string;
   participant: Array<{
     actor?: FhirReference;
-    status: 'accepted' | 'declined' | 'tentative' | 'needs-action';
+    status: ParticipantStatus;
     type?: FhirCodeableConcept[];
   }>;
   patientInstruction?: string;
@@ -38,7 +42,7 @@ export function toFhirAppointment(
         reference: `Patient/${patientId}`,
         type: 'Patient'
       },
-      status: 'accepted'
+      status: 'accepted' as ParticipantStatus
     }
   ];
 
@@ -49,7 +53,7 @@ export function toFhirAppointment(
         reference: `Practitioner/${practitionerId}`,
         type: 'Practitioner'
       },
-      status: appointmentData.practitionerStatus || 'needs-action'
+      status: (appointmentData.practitionerStatus || 'needs-action') as ParticipantStatus
     });
   }
 

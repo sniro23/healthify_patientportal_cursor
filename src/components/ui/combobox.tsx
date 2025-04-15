@@ -43,11 +43,13 @@ export function Combobox({
   disabled = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState("");
 
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
+  
   const selectedOption = React.useMemo(() => {
-    return options.find((option) => option.value === value);
-  }, [value, options]);
+    return safeOptions.find((option) => option.value === value);
+  }, [value, safeOptions]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -65,13 +67,10 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput 
-            placeholder="Search..." 
-            onValueChange={(search) => setSearchTerm(search)} 
-          />
+          <CommandInput placeholder="Search..." />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-auto">
-            {options.map((option) => (
+            {safeOptions.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.value}
