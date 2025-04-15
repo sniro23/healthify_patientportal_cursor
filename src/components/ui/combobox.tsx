@@ -44,7 +44,7 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
-  // Ensure options is always an array
+  // Ensure options is always an array, even if undefined is passed
   const safeOptions = Array.isArray(options) ? options : [];
   
   const selectedOption = React.useMemo(() => {
