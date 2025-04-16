@@ -1,5 +1,6 @@
 
 import './globals.css'
+import { Outlet } from 'react-router-dom'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -7,11 +8,7 @@ export const metadata: Metadata = {
   description: 'A modern patient portal for managing medical appointments and healthcare services',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout() {
   return (
     <html lang="en">
       <body>
@@ -30,7 +27,7 @@ export default function RootLayout({
               </div>
             </div>
           </header>
-          <main>{children}</main>
+          <main><Outlet /></main>
           <footer className="py-6 bg-muted">
             <div className="container mx-auto px-4 text-center text-muted-foreground">
               <p>© 2025 Healthify Patient Portal. All rights reserved.</p>

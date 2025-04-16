@@ -28,4 +28,4 @@ export default async function AppointmentsPage() {
       </ErrorBoundary>
     </div>
   );
-} 
+}
