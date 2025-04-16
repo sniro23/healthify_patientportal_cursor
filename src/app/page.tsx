@@ -1,20 +1,29 @@
+
+import React from 'react';
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8">Welcome to Healthify Patient Portal</h1>
-        <p className="text-xl mb-4">Your healthcare journey starts here</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Book Appointments</h2>
-            <p>Schedule your medical appointments with ease</p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Home Visits</h2>
-            <p>Request healthcare services at your doorstep</p>
-          </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
+        <h1 className="text-4xl font-bold text-center mb-8">Healthify Patient Portal</h1>
+        <p className="text-xl text-center mb-4">
+          Your modern healthcare management solution
+        </p>
+        <div className="flex flex-col md:flex-row justify-center gap-4 mt-8">
+          <a 
+            href="/appointments" 
+            className="px-6 py-3 bg-primary text-white rounded-md text-center hover:bg-primary/90 transition-colors"
+          >
+            Book Appointment
+          </a>
+          <a 
+            href="/medications" 
+            className="px-6 py-3 bg-secondary text-white rounded-md text-center hover:bg-secondary/90 transition-colors"
+          >
+            Manage Medications
+          </a>
         </div>
       </div>
     </main>
-  )
-} 
+  );
+}
