@@ -9,4 +9,7 @@ export default defineConfig({
     react(),
     componentTagger()
   ],
+  server: {
+    port: 8080
+  }
 })
