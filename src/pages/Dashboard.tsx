@@ -7,26 +7,13 @@ import { Calendar, PlusCircle, Activity, Pill, FileText, MessageCircle } from "l
 import AppointmentCard from "@/components/dashboard/AppointmentCard";
 import QuickAccessCard from "@/components/dashboard/QuickAccessCard";
 import { Button } from "@/components/ui/button";
-
-// Mock data, would be fetched from backend in production
-const mockUserData = {
-  name: "John",
-  subscriptionTier: "Category B"
-};
-
-const mockAppointment = {
-  id: "123",
-  doctorName: "Emily Chen",
-  specialty: "General Physician",
-  date: "Apr 16, 2025",
-  time: "10:30 AM",
-  type: "video" as const,
-  status: "upcoming" as const
-};
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useAppointments } from "@/lib/hooks/useAppointments";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Dashboard = () => {
-  const [userData, setUserData] = useState(mockUserData);
-  const [upcomingAppointment, setUpcomingAppointment] = useState(mockAppointment);
+  const { user, profile } = useAuth();
+  const { getUpcomingAppointment, isLoading: appointmentsLoading } = useAppointments();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
@@ -39,19 +26,30 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, []);
   
+  // Get the next upcoming appointment
+  const upcomingAppointment = getUpcomingAppointment();
+  
   const handleNewAppointment = () => {
     navigate("/appointments/book");
   };
+
+  if (loading || appointmentsLoading) {
+    return (
+      <PageContainer title="Healthify" className="space-y-6">
+        <LoadingSpinner />
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer title="Healthify" className="space-y-6">
       {/* Welcome section with subscription */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold">Hello, {userData.name}!</h1>
+          <h1 className="text-xl font-semibold">Hello, {profile?.first_name || user?.email?.split('@')[0] || "there"}!</h1>
           <p className="text-sm text-slate-600">Welcome to Healthify Patient Portal</p>
         </div>
-        <SubscriptionBadge tier={userData.subscriptionTier} />
+        <SubscriptionBadge tier="Category B" />
       </div>
       
       {/* Next appointment */}
@@ -69,10 +67,17 @@ const Dashboard = () => {
           </Button>
         </div>
         
-        {loading ? (
-          <div className="h-20 bg-slate-100 rounded-lg animate-pulse" />
-        ) : upcomingAppointment ? (
-          <AppointmentCard {...upcomingAppointment} />
+        {upcomingAppointment ? (
+          <AppointmentCard 
+            id={upcomingAppointment.id}
+            doctorName={upcomingAppointment.provider_type}
+            specialty={upcomingAppointment.specialty || ""}
+            date={new Date(upcomingAppointment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            time={upcomingAppointment.time_slot}
+            type={upcomingAppointment.delivery_method === "video" ? "video" : 
+                 upcomingAppointment.delivery_method === "chat" ? "chat" : "in-person"}
+            status="upcoming"
+          />
         ) : (
           <div className="p-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50">
             <p className="text-slate-600 mb-2">No upcoming appointments</p>
@@ -114,7 +119,7 @@ const Dashboard = () => {
             title="Health Records"
             description="View your medical data"
             icon={FileText}
-            to="/records"
+            to="/health-record"
           />
           <QuickAccessCard
             title="Consult a Doctor"

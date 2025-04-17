@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { 
   Select, 
   SelectContent, 
@@ -19,29 +18,12 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-
-interface VitalsInfo {
-  height: number;
-  weight: number;
-  bmi: number;
-  bloodGroup: string;
-}
+import { useVitalsInfo } from "@/lib/hooks/useHealthRecord";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const VitalsSection = () => {
-  const { toast } = useToast();
+  const { vitals, updateVitalsInfo, isLoading } = useVitalsInfo();
   const [isEditing, setIsEditing] = useState(false);
-  const [vitals, setVitals] = useState<VitalsInfo>({
-    height: 170,
-    weight: 68,
-    bmi: 23.5,
-    bloodGroup: "A+"
-  });
-  
-  const calculateBMI = (height: number, weight: number): number => {
-    // BMI = weight(kg) / (height(m))²
-    const heightInMeters = height / 100;
-    return parseFloat((weight / (heightInMeters * heightInMeters)).toFixed(1));
-  };
   
   const getBMICategory = (bmi: number): { category: string; color: string } => {
     if (bmi < 18.5) return { category: "Underweight", color: "bg-blue-100 text-blue-800" };
@@ -50,25 +32,16 @@ const VitalsSection = () => {
     return { category: "Obese", color: "bg-red-100 text-red-800" };
   };
   
-  const handleSave = (updatedInfo: Partial<VitalsInfo>) => {
-    const newHeight = updatedInfo.height || vitals.height;
-    const newWeight = updatedInfo.weight || vitals.weight;
-    const newBMI = calculateBMI(newHeight, newWeight);
-    
-    const updatedVitals = {
-      ...vitals,
-      ...updatedInfo,
-      bmi: newBMI
-    };
-    
-    setVitals(updatedVitals);
-    setIsEditing(false);
-    
-    toast({
-      title: "Vitals information updated",
-      description: "Your vitals have been updated successfully"
-    });
+  const handleSave = async (updatedInfo: Partial<typeof vitals>) => {
+    const success = await updateVitalsInfo(updatedInfo);
+    if (success) {
+      setIsEditing(false);
+    }
   };
+  
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   
   const bmiInfo = getBMICategory(vitals.bmi);
   
@@ -110,7 +83,7 @@ const VitalsSection = () => {
         
         <div>
           <p className="text-sm text-slate-500">Blood Group</p>
-          <p className="font-medium">{vitals.bloodGroup}</p>
+          <p className="font-medium">{vitals.blood_group}</p>
         </div>
       </div>
       
@@ -128,7 +101,7 @@ const VitalsSection = () => {
               handleSave({
                 height: parseFloat(formData.get("height") as string),
                 weight: parseFloat(formData.get("weight") as string),
-                bloodGroup: formData.get("bloodGroup") as string
+                blood_group: formData.get("bloodGroup") as string
               });
             }}
           >
@@ -158,7 +131,7 @@ const VitalsSection = () => {
             
             <div>
               <Label htmlFor="bloodGroup">Blood Group</Label>
-              <Select name="bloodGroup" defaultValue={vitals.bloodGroup}>
+              <Select name="bloodGroup" defaultValue={vitals.blood_group}>
                 <SelectTrigger id="bloodGroup">
                   <SelectValue placeholder="Select blood group" />
                 </SelectTrigger>

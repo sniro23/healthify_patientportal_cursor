@@ -9,7 +9,6 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { 
   Select, 
   SelectContent, 
@@ -17,34 +16,18 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-
-interface LifestyleInfo {
-  activityLevel: string;
-  smokingStatus: string;
-  alcoholConsumption: string;
-}
+import { useLifestyleInfo } from "@/lib/hooks/useHealthRecord";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const LifestyleSection = () => {
-  const { toast } = useToast();
+  const { lifestyle, updateLifestyleInfo, isLoading } = useLifestyleInfo();
   const [isEditing, setIsEditing] = useState(false);
-  const [lifestyle, setLifestyle] = useState<LifestyleInfo>({
-    activityLevel: "Moderate",
-    smokingStatus: "Never",
-    alcoholConsumption: "Occasionally"
-  });
   
-  const handleSave = (updatedInfo: Partial<LifestyleInfo>) => {
-    setLifestyle({
-      ...lifestyle,
-      ...updatedInfo
-    });
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Lifestyle information updated",
-      description: "Your lifestyle information has been saved"
-    });
+  const handleSave = async (updatedInfo: Partial<typeof lifestyle>) => {
+    const success = await updateLifestyleInfo(updatedInfo);
+    if (success) {
+      setIsEditing(false);
+    }
   };
   
   const getActivityLevelBadge = (level: string) => {
@@ -90,6 +73,10 @@ const LifestyleSection = () => {
     }
   };
   
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+  
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -109,8 +96,8 @@ const LifestyleSection = () => {
         <div>
           <p className="text-sm text-slate-500">Physical Activity Level</p>
           <p className="font-medium flex items-center mt-1">
-            <span className={getActivityLevelBadge(lifestyle.activityLevel)}>
-              {lifestyle.activityLevel}
+            <span className={getActivityLevelBadge(lifestyle.activity_level)}>
+              {lifestyle.activity_level}
             </span>
           </p>
         </div>
@@ -118,8 +105,8 @@ const LifestyleSection = () => {
         <div>
           <p className="text-sm text-slate-500">Smoking Status</p>
           <p className="font-medium flex items-center mt-1">
-            <span className={getSmokingBadge(lifestyle.smokingStatus)}>
-              {lifestyle.smokingStatus}
+            <span className={getSmokingBadge(lifestyle.smoking_status)}>
+              {lifestyle.smoking_status}
             </span>
           </p>
         </div>
@@ -127,8 +114,8 @@ const LifestyleSection = () => {
         <div>
           <p className="text-sm text-slate-500">Alcohol Consumption</p>
           <p className="font-medium flex items-center mt-1">
-            <span className={getAlcoholBadge(lifestyle.alcoholConsumption)}>
-              {lifestyle.alcoholConsumption}
+            <span className={getAlcoholBadge(lifestyle.alcohol_consumption)}>
+              {lifestyle.alcohol_consumption}
             </span>
           </p>
         </div>
@@ -146,15 +133,15 @@ const LifestyleSection = () => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               handleSave({
-                activityLevel: formData.get("activityLevel") as string,
-                smokingStatus: formData.get("smokingStatus") as string,
-                alcoholConsumption: formData.get("alcoholConsumption") as string
+                activity_level: formData.get("activityLevel") as string,
+                smoking_status: formData.get("smokingStatus") as string,
+                alcohol_consumption: formData.get("alcoholConsumption") as string
               });
             }}
           >
             <div>
               <Label htmlFor="activityLevel">Physical Activity Level</Label>
-              <Select name="activityLevel" defaultValue={lifestyle.activityLevel}>
+              <Select name="activityLevel" defaultValue={lifestyle.activity_level}>
                 <SelectTrigger id="activityLevel">
                   <SelectValue placeholder="Select activity level" />
                 </SelectTrigger>
@@ -169,7 +156,7 @@ const LifestyleSection = () => {
             
             <div>
               <Label htmlFor="smokingStatus">Smoking Status</Label>
-              <Select name="smokingStatus" defaultValue={lifestyle.smokingStatus}>
+              <Select name="smokingStatus" defaultValue={lifestyle.smoking_status}>
                 <SelectTrigger id="smokingStatus">
                   <SelectValue placeholder="Select smoking status" />
                 </SelectTrigger>
@@ -183,7 +170,7 @@ const LifestyleSection = () => {
             
             <div>
               <Label htmlFor="alcoholConsumption">Alcohol Consumption</Label>
-              <Select name="alcoholConsumption" defaultValue={lifestyle.alcoholConsumption}>
+              <Select name="alcoholConsumption" defaultValue={lifestyle.alcohol_consumption}>
                 <SelectTrigger id="alcoholConsumption">
                   <SelectValue placeholder="Select alcohol consumption" />
                 </SelectTrigger>

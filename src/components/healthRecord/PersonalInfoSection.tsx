@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { 
   Select, 
   SelectContent, 
@@ -18,41 +17,23 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-
-interface PersonalInfo {
-  fullName: string;
-  age: number;
-  gender: string;
-  address: string;
-  maritalStatus: string;
-  children: number;
-}
+import { usePersonalInfo } from "@/lib/hooks/useHealthRecord";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const PersonalInfoSection = () => {
-  const { toast } = useToast();
+  const { personalInfo, updatePersonalInfo, isLoading } = usePersonalInfo();
   const [isEditing, setIsEditing] = useState(false);
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    fullName: "John Doe",
-    age: 32,
-    gender: "Male",
-    address: "123 Medical Lane, Colombo, Sri Lanka",
-    maritalStatus: "Married",
-    children: 2
-  });
   
-  const handleSave = (updatedInfo: Partial<PersonalInfo>) => {
-    setPersonalInfo({
-      ...personalInfo,
-      ...updatedInfo
-    });
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Personal information updated",
-      description: "Your personal details have been saved"
-    });
+  const handleSave = async (updatedInfo: Partial<typeof personalInfo>) => {
+    const success = await updatePersonalInfo(updatedInfo);
+    if (success) {
+      setIsEditing(false);
+    }
   };
+  
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   
   return (
     <div>
@@ -72,7 +53,7 @@ const PersonalInfoSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <p className="text-sm text-slate-500">Full Name</p>
-          <p className="font-medium">{personalInfo.fullName}</p>
+          <p className="font-medium">{personalInfo.full_name}</p>
         </div>
         
         <div>
@@ -87,7 +68,7 @@ const PersonalInfoSection = () => {
         
         <div>
           <p className="text-sm text-slate-500">Marital Status</p>
-          <p className="font-medium">{personalInfo.maritalStatus}</p>
+          <p className="font-medium">{personalInfo.marital_status}</p>
         </div>
         
         <div>
@@ -113,11 +94,11 @@ const PersonalInfoSection = () => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               handleSave({
-                fullName: formData.get("fullName") as string,
+                full_name: formData.get("fullName") as string,
                 age: parseInt(formData.get("age") as string),
                 gender: formData.get("gender") as string,
                 address: formData.get("address") as string,
-                maritalStatus: formData.get("maritalStatus") as string,
+                marital_status: formData.get("maritalStatus") as string,
                 children: parseInt(formData.get("children") as string)
               });
             }}
@@ -127,7 +108,7 @@ const PersonalInfoSection = () => {
               <Input 
                 id="fullName" 
                 name="fullName"
-                defaultValue={personalInfo.fullName} 
+                defaultValue={personalInfo.full_name} 
               />
             </div>
             
@@ -160,7 +141,7 @@ const PersonalInfoSection = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="maritalStatus">Marital Status</Label>
-                <Select name="maritalStatus" defaultValue={personalInfo.maritalStatus}>
+                <Select name="maritalStatus" defaultValue={personalInfo.marital_status}>
                   <SelectTrigger id="maritalStatus">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
