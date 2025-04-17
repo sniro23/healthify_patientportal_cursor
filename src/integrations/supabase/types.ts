@@ -54,6 +54,168 @@ export type Database = {
         }
         Relationships: []
       }
+      health_lab_reports: {
+        Row: {
+          created_at: string
+          date: string
+          fileurl: string | null
+          id: string
+          name: string
+          status: string
+          testresults: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          fileurl?: string | null
+          id?: string
+          name: string
+          status: string
+          testresults?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          fileurl?: string | null
+          id?: string
+          name?: string
+          status?: string
+          testresults?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_lifestyle: {
+        Row: {
+          activity_level: string
+          alcohol_consumption: string
+          created_at: string
+          id: string
+          smoking_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_level: string
+          alcohol_consumption: string
+          created_at?: string
+          id?: string
+          smoking_status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_level?: string
+          alcohol_consumption?: string
+          created_at?: string
+          id?: string
+          smoking_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metrics: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metrics: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metrics?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_personal_info: {
+        Row: {
+          address: string
+          age: number
+          children: number
+          created_at: string
+          full_name: string
+          gender: string
+          id: string
+          marital_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          age: number
+          children?: number
+          created_at?: string
+          full_name: string
+          gender: string
+          id?: string
+          marital_status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          age?: number
+          children?: number
+          created_at?: string
+          full_name?: string
+          gender?: string
+          id?: string
+          marital_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_vitals: {
+        Row: {
+          blood_group: string
+          bmi: number
+          created_at: string
+          height: number
+          id: string
+          updated_at: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          blood_group: string
+          bmi: number
+          created_at?: string
+          height: number
+          id?: string
+          updated_at?: string
+          user_id: string
+          weight: number
+        }
+        Update: {
+          blood_group?: string
+          bmi?: number
+          created_at?: string
+          height?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       medications: {
         Row: {
           created_at: string

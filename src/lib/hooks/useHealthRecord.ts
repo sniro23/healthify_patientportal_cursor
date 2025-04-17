@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -102,8 +101,17 @@ export const usePersonalInfo = () => {
 
         if (error) {
           console.error('Error fetching personal info:', error);
+          setPersonalInfo({
+            full_name: "",
+            age: 0,
+            gender: "",
+            address: "",
+            marital_status: "",
+            children: 0
+          });
         } else if (data) {
-          setPersonalInfo(data);
+          // Type assertion to ensure conformity to PersonalInfo
+          setPersonalInfo(data as PersonalInfo);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -135,7 +143,7 @@ export const usePersonalInfo = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
+      if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
       }
 

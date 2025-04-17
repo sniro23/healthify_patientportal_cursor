@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -8,13 +7,13 @@ export interface Appointment {
   id: string;
   user_id: string;
   provider_type: string;
-  specialty?: string;
+  specialty?: string | null;
   consultation_type: string;
   delivery_method: string;
   date: string;
   time_slot: string;
   status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
-  notes?: string;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -57,8 +56,9 @@ export const useAppointments = () => {
             description: "Could not fetch appointments",
             variant: "destructive"
           });
+          setAppointments([]);
         } else {
-          setAppointments(data || []);
+          setAppointments(data as Appointment[]);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -103,15 +103,16 @@ export const useAppointments = () => {
         return null;
       }
 
-      // Add the new appointment to the local state
-      setAppointments([...appointments, data]);
+      const createdAppointment = data as Appointment;
+      
+      setAppointments(prevAppointments => [...prevAppointments, createdAppointment]);
       
       toast({
         title: "Appointment booked",
         description: "Your appointment has been scheduled successfully"
       });
       
-      return data;
+      return createdAppointment;
     } catch (error) {
       console.error('Unexpected error:', error);
       return null;
@@ -142,7 +143,6 @@ export const useAppointments = () => {
         return null;
       }
 
-      // Update the appointment in the local state
       setAppointments(
         appointments.map(appointment => 
           appointment.id === id ? data : appointment
@@ -185,7 +185,6 @@ export const useAppointments = () => {
         return false;
       }
 
-      // Update the appointment in the local state
       setAppointments(
         appointments.map(appointment => 
           appointment.id === id ? data : appointment
@@ -210,13 +209,11 @@ export const useAppointments = () => {
     }
 
     try {
-      // First check if we already have it in state
       const existingAppointment = appointments.find(a => a.id === id);
       if (existingAppointment) {
         return existingAppointment;
       }
 
-      // If not, fetch from API
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
