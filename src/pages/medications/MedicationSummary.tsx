@@ -1,239 +1,185 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { Pill, FileText, History, Download, Plus, Check, Clock } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { Plus, Search, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Medication } from "@/lib/models/medication";
-
-// Mock data for medications
-const MOCK_ROUTINE_MEDICATIONS: Medication[] = [
-  {
-    id: "med1",
-    name: "Metformin",
-    dosage: "500mg",
-    frequency: "Twice daily",
-    startDate: new Date(2024, 3, 1),
-    isActive: true,
-    userId: "user1",
-    createdAt: new Date(2024, 3, 1),
-    isRoutine: true,
-  },
-  {
-    id: "med2",
-    name: "Vitamin D3",
-    dosage: "1000 IU",
-    frequency: "Once daily",
-    startDate: new Date(2024, 2, 15),
-    isActive: true,
-    userId: "user1",
-    createdAt: new Date(2024, 2, 15),
-    isRoutine: true,
-  },
-];
-
-const MOCK_PRESCRIBED_MEDICATIONS: Medication[] = [
-  {
-    id: "med3",
-    name: "Paracetamol",
-    dosage: "500mg",
-    frequency: "Three times daily",
-    startDate: new Date(2025, 2, 15),
-    endDate: new Date(2025, 2, 20),
-    isActive: true,
-    instructions: "Take after meals",
-    prescribedBy: "Dr. Silva",
-    prescriptionId: "presc1",
-    userId: "user1",
-    createdAt: new Date(2025, 2, 15),
-    isRoutine: false,
-  },
-  {
-    id: "med4",
-    name: "Amoxicillin",
-    dosage: "500mg",
-    frequency: "Three times daily",
-    startDate: new Date(2025, 2, 10),
-    endDate: new Date(2025, 2, 17),
-    isActive: false,
-    instructions: "Take with food",
-    prescribedBy: "Dr. Ravi",
-    prescriptionId: "presc2",
-    userId: "user1",
-    createdAt: new Date(2025, 2, 10),
-    isRoutine: false,
-  },
-];
-
-// Combine both and use for history tab
-const MOCK_MEDICATION_HISTORY: Medication[] = [
-  ...MOCK_ROUTINE_MEDICATIONS,
-  ...MOCK_PRESCRIBED_MEDICATIONS,
-].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { format, parseISO } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const MedicationSummary = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("routine");
+  const { user } = useAuth();
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [activeMedications, setActiveMedications] = useState<Medication[]>([]);
+  const [pastMedications, setPastMedications] = useState<Medication[]>([]);
+  const [activeTab, setActiveTab] = useState("current");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddMedication = () => {
+  useEffect(() => {
+    if (user) {
+      fetchMedications();
+    }
+  }, [user]);
+
+  const fetchMedications = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('medications')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        // Convert to our medication model
+        const medicationsData = data.map(med => ({
+          id: med.id,
+          name: med.name,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          startDate: new Date(med.start_date),
+          endDate: med.end_date ? new Date(med.end_date) : undefined,
+          isActive: !med.end_date || new Date(med.end_date) > new Date(),
+          instructions: med.notes,
+          prescribedBy: med.prescribed_by,
+          userId: med.user_id,
+          createdAt: new Date(med.created_at),
+          isRoutine: !med.prescribed_by // If no prescriber, consider it self-reported/routine
+        }));
+
+        setMedications(medicationsData);
+        setActiveMedications(medicationsData.filter(med => med.isActive));
+        setPastMedications(medicationsData.filter(med => !med.isActive));
+      }
+    } catch (error) {
+      console.error("Error fetching medications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addMedication = () => {
     navigate("/medications/add");
   };
 
-  const handleViewPrescription = (prescriptionId: string) => {
-    navigate(`/medications/prescription/${prescriptionId}`);
-  };
+  const filteredActiveMedications = activeMedications.filter(med => 
+    med.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const handleDownload = (medicationId: string) => {
-    toast({
-      title: "Downloading prescription",
-      description: "Your prescription PDF is being prepared...",
-    });
-  };
+  const filteredPastMedications = pastMedications.filter(med => 
+    med.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const renderMedicationCard = (medication: Medication) => {
-    const isExpired = medication.endDate ? new Date() > medication.endDate : false;
-    const statusColor = isExpired ? "text-gray-500" : medication.isActive ? "text-green-600" : "text-amber-500";
-    const statusIcon = isExpired ? <Clock size={16} /> : medication.isActive ? <Check size={16} /> : <Clock size={16} />;
+  const renderMedicationList = (medicationList: Medication[]) => {
+    if (isLoading) {
+      return Array(3).fill(0).map((_, i) => (
+        <div key={i} className="p-4 border rounded-lg mb-3">
+          <Skeleton className="h-6 w-3/4 mb-2" />
+          <Skeleton className="h-4 w-1/2 mb-2" />
+          <Skeleton className="h-4 w-1/4" />
+        </div>
+      ));
+    }
 
-    return (
-      <Card key={medication.id} className="mb-3 p-4 hover:bg-slate-50">
-        <div className="flex justify-between">
+    if (medicationList.length === 0) {
+      return (
+        <div className="text-center py-6">
+          <p className="text-slate-500">No medications found</p>
+        </div>
+      );
+    }
+
+    return medicationList.map((med) => (
+      <div key={med.id} className="p-4 bg-white border rounded-lg mb-3">
+        <div className="flex justify-between items-start">
           <div>
-            <div className="font-medium flex items-center">
-              {medication.name}{" "}
-              <Badge variant="outline" className="ml-2">
-                {medication.dosage}
-              </Badge>
-            </div>
-            <div className="text-sm text-muted-foreground">{medication.frequency}</div>
-            <div className="text-xs text-slate-500 mt-1">
-              Since {format(medication.startDate, "dd MMM yyyy")}
-              {medication.endDate && ` until ${format(medication.endDate, "dd MMM yyyy")}`}
-            </div>
+            <h3 className="font-medium text-lg">{med.name}</h3>
+            <p className="text-slate-600 text-sm">{med.dosage}</p>
           </div>
-          <div className="flex flex-col items-end">
-            <span className={`flex items-center ${statusColor} text-xs mb-1`}>
-              {statusIcon}
-              <span className="ml-1">{isExpired ? "Completed" : medication.isActive ? "Active" : "On hold"}</span>
+          {med.isActive && (
+            <span className="bg-green-50 text-green-700 text-xs py-1 px-2 rounded-full">
+              Active
             </span>
-            
-            {medication.prescriptionId && (
-              <div className="mt-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-health-primary"
-                  onClick={() => handleViewPrescription(medication.prescriptionId!)}
-                >
-                  <FileText size={16} className="mr-1" />
-                  View
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-health-primary"
-                  onClick={() => handleDownload(medication.id)}
-                >
-                  <Download size={16} className="mr-1" />
-                  PDF
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
+          {!med.isActive && (
+            <span className="bg-slate-100 text-slate-700 text-xs py-1 px-2 rounded-full">
+              Past
+            </span>
+          )}
         </div>
         
-        {medication.prescribedBy && (
-          <div className="text-xs text-slate-500 mt-2">
-            Prescribed by {medication.prescribedBy} on {format(medication.createdAt, "dd MMM yyyy")}
-          </div>
-        )}
+        <div className="mt-3 flex items-center text-xs text-slate-500">
+          <Clock size={14} className="mr-1" />
+          <span>{med.frequency}</span>
+        </div>
         
-        {medication.instructions && (
-          <div className="text-sm mt-2 text-slate-700 bg-slate-50 p-2 rounded">
-            <span className="font-medium">Instructions:</span> {medication.instructions}
+        <div className="mt-2 flex items-center text-xs text-slate-500">
+          <Calendar size={14} className="mr-1" />
+          <span>
+            Started: {format(med.startDate, "MMM d, yyyy")}
+            {med.endDate && ` • Ended: ${format(med.endDate, "MMM d, yyyy")}`}
+          </span>
+        </div>
+        
+        {med.instructions && (
+          <div className="mt-3 bg-amber-50 p-2 rounded text-xs flex items-start">
+            <AlertTriangle size={14} className="mr-1 text-amber-500 mt-0.5" />
+            <span>{med.instructions}</span>
           </div>
         )}
-      </Card>
-    );
+      </div>
+    ));
   };
 
   return (
-    <PageContainer title="Medications" showBackButton={true}>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Medications</h1>
-          <p className="text-slate-600 mt-1">
-            Manage your medications and prescriptions
-          </p>
+    <PageContainer title="Medications" showBackButton>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">My Medications</h1>
+        <p className="text-slate-600 mt-1">
+          Track and manage your medications
+        </p>
+      </div>
+
+      <div className="mb-4 flex items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+          <Input
+            placeholder="Search medications..."
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <Button onClick={handleAddMedication}>
-          <Plus size={16} className="mr-1" />
-          Add Medication
+        <Button 
+          className="ml-2 bg-health-primary hover:bg-health-accent"
+          onClick={addMedication}
+        >
+          <Plus size={18} className="mr-1" />
+          Add
         </Button>
       </div>
 
-      <Tabs 
-        defaultValue={activeTab} 
-        onValueChange={setActiveTab} 
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="routine" className="flex items-center">
-            <Pill size={16} className="mr-2" />
-            Routine
-          </TabsTrigger>
-          <TabsTrigger value="prescribed" className="flex items-center">
-            <FileText size={16} className="mr-2" />
-            Prescribed
-          </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center">
-            <History size={16} className="mr-2" />
-            History
-          </TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full mb-4">
+          <TabsTrigger value="current" className="flex-1">Current ({filteredActiveMedications.length})</TabsTrigger>
+          <TabsTrigger value="past" className="flex-1">Past ({filteredPastMedications.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="routine">
-          {MOCK_ROUTINE_MEDICATIONS.length > 0 ? (
-            MOCK_ROUTINE_MEDICATIONS.map(med => renderMedicationCard(med))
-          ) : (
-            <div className="text-center py-8 text-slate-500">
-              <Pill size={40} className="mx-auto mb-3 text-slate-400" />
-              <p>No routine medications added yet</p>
-              <Button variant="outline" className="mt-4" onClick={handleAddMedication}>
-                <Plus size={16} className="mr-1" />
-                Add Medication
-              </Button>
-            </div>
-          )}
+        <TabsContent value="current" className="space-y-2">
+          {renderMedicationList(filteredActiveMedications)}
         </TabsContent>
 
-        <TabsContent value="prescribed">
-          {MOCK_PRESCRIBED_MEDICATIONS.length > 0 ? (
-            MOCK_PRESCRIBED_MEDICATIONS.map(med => renderMedicationCard(med))
-          ) : (
-            <div className="text-center py-8 text-slate-500">
-              <FileText size={40} className="mx-auto mb-3 text-slate-400" />
-              <p>No prescribed medications found</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="history">
-          {MOCK_MEDICATION_HISTORY.length > 0 ? (
-            MOCK_MEDICATION_HISTORY.map(med => renderMedicationCard(med))
-          ) : (
-            <div className="text-center py-8 text-slate-500">
-              <History size={40} className="mx-auto mb-3 text-slate-400" />
-              <p>No medication history found</p>
-            </div>
-          )}
+        <TabsContent value="past" className="space-y-2">
+          {renderMedicationList(filteredPastMedications)}
         </TabsContent>
       </Tabs>
     </PageContainer>

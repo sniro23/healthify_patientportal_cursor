@@ -5,47 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      // Here you would typically integrate with Supabase or other auth provider
-      // For now, we'll simulate a successful login
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock successful login
-      localStorage.setItem("isAuthenticated", "true");
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome to Healthify Patient Portal",
-      });
-      
-      // Check if the user has completed profile setup
-      const hasCompletedProfile = localStorage.getItem("hasCompletedProfile");
-      
-      if (hasCompletedProfile) {
-        navigate("/");
-      } else {
-        navigate("/profile-setup");
-      }
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await signIn(email, password);
   };
 
   return (

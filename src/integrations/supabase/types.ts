@@ -9,13 +9,176 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          consultation_type: string
+          created_at: string
+          date: string
+          delivery_method: string
+          id: string
+          notes: string | null
+          provider_type: string
+          specialty: string | null
+          status: string
+          time_slot: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consultation_type: string
+          created_at?: string
+          date: string
+          delivery_method: string
+          id?: string
+          notes?: string | null
+          provider_type: string
+          specialty?: string | null
+          status?: string
+          time_slot: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consultation_type?: string
+          created_at?: string
+          date?: string
+          delivery_method?: string
+          id?: string
+          notes?: string | null
+          provider_type?: string
+          specialty?: string | null
+          status?: string
+          time_slot?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medications: {
+        Row: {
+          created_at: string
+          dosage: string
+          end_date: string | null
+          frequency: string
+          id: string
+          name: string
+          notes: string | null
+          prescribed_by: string | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dosage: string
+          end_date?: string | null
+          frequency: string
+          id?: string
+          name: string
+          notes?: string | null
+          prescribed_by?: string | null
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          prescribed_by?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          blood_group: string | null
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact: string | null
+          emergency_contact_phone: string | null
+          first_name: string | null
+          gender: string | null
+          has_completed_profile: boolean
+          height: number | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          profile_image_url: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          address?: string | null
+          blood_group?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact?: string | null
+          emergency_contact_phone?: string | null
+          first_name?: string | null
+          gender?: string | null
+          has_completed_profile?: boolean
+          height?: number | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          profile_image_url?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          address?: string | null
+          blood_group?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact?: string | null
+          emergency_contact_phone?: string | null
+          first_name?: string | null
+          gender?: string | null
+          has_completed_profile?: boolean
+          height?: number | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          profile_image_url?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string | null
+          blood_group: string | null
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact: string | null
+          emergency_contact_phone: string | null
+          first_name: string | null
+          gender: string | null
+          has_completed_profile: boolean
+          height: number | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          profile_image_url: string | null
+          updated_at: string
+          weight: number | null
+        }
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,9 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { AuthProvider } from "@/lib/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
@@ -40,38 +42,6 @@ import PrescriptionDetails from "./pages/medications/PrescriptionDetails";
 
 const queryClient = new QueryClient();
 
-// Auth guard component to protect routes
-const RequireAuth = ({ children }: { children: JSX.Element }) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const hasCompletedProfile = localStorage.getItem("hasCompletedProfile") === "true";
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-  
-  if (!hasCompletedProfile) {
-    return <Navigate to="/profile-setup" />;
-  }
-  
-  return children;
-};
-
-// Check if first-time user
-const CheckFirstTime = () => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const hasSeenSplash = localStorage.getItem("hasSeenSplash") === "true";
-
-  if (!hasSeenSplash) {
-    return <Navigate to="/splash" />;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <Navigate to="/dashboard" />;
-};
-
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   
@@ -91,129 +61,51 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<CheckFirstTime />} />
-            <Route path="/splash" element={<SplashScreen />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/dashboard" element={
-              <RequireAuth>
-                <Dashboard />
-              </RequireAuth>
-            } />
-            <Route path="/profile" element={
-              <RequireAuth>
-                <Profile />
-              </RequireAuth>
-            } />
-            <Route path="/health-record" element={
-              <RequireAuth>
-                <HealthRecord />
-              </RequireAuth>
-            } />
-            
-            {/* Appointment Routes */}
-            <Route path="/appointments/book" element={
-              <RequireAuth>
-                <BookAppointment />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/urgent" element={
-              <RequireAuth>
-                <UrgentConsultation />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/scheduled" element={
-              <RequireAuth>
-                <ScheduledConsultation />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/home-visit" element={
-              <RequireAuth>
-                <HomeVisit />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/payment" element={
-              <RequireAuth>
-                <Payment />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/confirmation" element={
-              <RequireAuth>
-                <Confirmation />
-              </RequireAuth>
-            } />
-            <Route path="/appointments" element={
-              <RequireAuth>
-                <AppointmentHistory />
-              </RequireAuth>
-            } />
-            <Route path="/appointments/:id" element={
-              <RequireAuth>
-                <AppointmentDetails />
-              </RequireAuth>
-            } />
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/splash" element={<SplashScreen />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/profile-setup" element={<ProfileSetup />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/health-record" element={<HealthRecord />} />
+              
+              {/* Appointment Routes */}
+              <Route path="/appointments/book" element={<BookAppointment />} />
+              <Route path="/appointments/urgent" element={<UrgentConsultation />} />
+              <Route path="/appointments/scheduled" element={<ScheduledConsultation />} />
+              <Route path="/appointments/home-visit" element={<HomeVisit />} />
+              <Route path="/appointments/payment" element={<Payment />} />
+              <Route path="/appointments/confirmation" element={<Confirmation />} />
+              <Route path="/appointments" element={<AppointmentHistory />} />
+              <Route path="/appointments/:id" element={<AppointmentDetails />} />
 
-            {/* Chat Routes */}
-            <Route path="/chat" element={
-              <RequireAuth>
-                <ChatOverviewPage />
-              </RequireAuth>
-            } />
-            <Route path="/chat/new" element={
-              <RequireAuth>
-                <NewChatPage />
-              </RequireAuth>
-            } />
-            <Route path="/chat/waiting" element={
-              <RequireAuth>
-                <WaitingForDoctorPage />
-              </RequireAuth>
-            } />
-            <Route path="/chat/:chatId" element={
-              <RequireAuth>
-                <ChatSessionPage />
-              </RequireAuth>
-            } />
-            <Route path="/chat/:chatId/ended" element={
-              <RequireAuth>
-                <ChatEndedPage />
-              </RequireAuth>
-            } />
-            <Route path="/consultations/summary/:summaryId" element={
-              <RequireAuth>
-                <VisitSummaryPage />
-              </RequireAuth>
-            } />
-            
-            {/* Medication Routes */}
-            <Route path="/medications" element={
-              <RequireAuth>
-                <MedicationSummary />
-              </RequireAuth>
-            } />
-            <Route path="/medications/add" element={
-              <RequireAuth>
-                <AddMedication />
-              </RequireAuth>
-            } />
-            <Route path="/medications/prescription/:prescriptionId" element={
-              <RequireAuth>
-                <PrescriptionDetails />
-              </RequireAuth>
-            } />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+              {/* Chat Routes */}
+              <Route path="/chat" element={<ChatOverviewPage />} />
+              <Route path="/chat/new" element={<NewChatPage />} />
+              <Route path="/chat/waiting" element={<WaitingForDoctorPage />} />
+              <Route path="/chat/:chatId" element={<ChatSessionPage />} />
+              <Route path="/chat/:chatId/ended" element={<ChatEndedPage />} />
+              <Route path="/consultations/summary/:summaryId" element={<VisitSummaryPage />} />
+              
+              {/* Medication Routes */}
+              <Route path="/medications" element={<MedicationSummary />} />
+              <Route path="/medications/add" element={<AddMedication />} />
+              <Route path="/medications/prescription/:prescriptionId" element={<PrescriptionDetails />} />
+              
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 };

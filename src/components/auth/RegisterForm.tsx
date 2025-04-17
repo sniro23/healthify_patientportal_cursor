@@ -1,17 +1,16 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const { signUp, isLoading } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,32 +24,7 @@ const RegisterForm = () => {
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      // Here you would typically integrate with Supabase or other auth provider
-      // For now, we'll simulate a successful registration
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock successful registration
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("hasCompletedProfile", "false");
-      
-      toast({
-        title: "Registration successful",
-        description: "Welcome to Healthify Patient Portal",
-      });
-      
-      navigate("/profile-setup");
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "There was a problem creating your account",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await signUp(email, password);
   };
 
   return (
@@ -104,7 +78,7 @@ const RegisterForm = () => {
         <Button
           variant="link"
           className="p-0 h-auto text-health-primary"
-          onClick={() => navigate("/login")}
+          onClick={() => window.location.href = "/login"}
           type="button"
         >
           Sign in

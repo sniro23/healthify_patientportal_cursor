@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Form, 
   FormControl, 
@@ -15,6 +14,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 
@@ -35,17 +36,47 @@ interface PasswordFormValues {
 
 const AccountSettings = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [googleLinked, setGoogleLinked] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   
   const form = useForm<z.infer<typeof accountSchema>>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
-      email: "user@example.com",
-      phone: "+94 76 123 4567"
+      email: user?.email || "",
+      phone: ""
     }
   });
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data);
+        form.setValue('email', user?.email || "");
+        form.setValue('phone', data.phone || "");
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
   
   const passwordForm = useForm<PasswordFormValues>({
     defaultValues: {
@@ -55,23 +86,39 @@ const AccountSettings = () => {
     }
   });
   
-  const onSubmit = (data: z.infer<typeof accountSchema>) => {
+  const onSubmit = async (data: z.infer<typeof accountSchema>) => {
+    if (!user) return;
+    
     setIsSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Account settings saved:", data);
-      setIsSaving(false);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          phone: data.phone,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
       
       toast({
         title: "Account updated",
         description: "Your account information has been updated",
       });
-    }, 800);
+    } catch (error: any) {
+      console.error('Update error:', error);
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
   
-  const onPasswordSubmit = (data: PasswordFormValues) => {
-    // Simulate password change
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
     if (data.newPassword !== data.confirmPassword) {
       toast({
         title: "Passwords do not match",
@@ -81,9 +128,13 @@ const AccountSettings = () => {
       return;
     }
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Password changed");
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword
+      });
+
+      if (error) throw error;
+      
       setPasswordDialogOpen(false);
       passwordForm.reset();
       
@@ -91,7 +142,13 @@ const AccountSettings = () => {
         title: "Password updated",
         description: "Your password has been changed successfully",
       });
-    }, 800);
+    } catch (error: any) {
+      toast({
+        title: "Password update failed",
+        description: error.message || "Failed to update password",
+        variant: "destructive"
+      });
+    }
   };
   
   const toggleGoogleLink = () => {

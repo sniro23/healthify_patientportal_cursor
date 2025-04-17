@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
   "Personal Information",
-  "Lifestyle Details",
+  "Lifestyle Details", 
   "Vitals and Measurements",
   "Medical History",
   "Routine Medications"
 ];
 
 const ProfileSetupForm = () => {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [personalInfo, setPersonalInfo] = useState({
     fullName: "",
@@ -99,27 +101,63 @@ const ProfileSetupForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to complete profile setup",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
-      // Here you would typically send the data to your backend
-      // For now, we'll simulate a successful profile setup
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Parse the fullName into first_name and last_name
+      const nameParts = personalInfo.fullName.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      // Save profile data to Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          date_of_birth: personalInfo.dateOfBirth,
+          gender: personalInfo.gender,
+          address: personalInfo.address,
+          height: parseFloat(vitals.height) || null,
+          weight: parseFloat(vitals.weight) || null,
+          blood_group: vitals.bloodGroup,
+          has_completed_profile: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Create medication if provided
+      if (medications.drugName && medications.dosage && medications.frequency) {
+        const { error: medError } = await supabase
+          .from('medications')
+          .insert({
+            user_id: user.id,
+            name: medications.drugName,
+            dosage: medications.dosage,
+            frequency: medications.frequency,
+            start_date: new Date().toISOString(),
+            notes: "Added during profile setup",
+          });
+
+        if (medError) {
+          console.error("Error saving medication:", medError);
+        }
+      }
       
-      // Store all profile data
-      const profileData = {
-        personalInfo,
-        lifestyle,
-        vitals: {
-          ...vitals,
-          bmi: calculateBMI()
-        },
-        medicalHistory,
-        medications
-      };
-      
-      // Save to localStorage for demo purposes
-      localStorage.setItem("profileData", JSON.stringify(profileData));
+      // Store profile completion status in localStorage
       localStorage.setItem("hasCompletedProfile", "true");
       
       toast({
@@ -127,11 +165,12 @@ const ProfileSetupForm = () => {
         description: "Your medical profile has been saved",
       });
       
-      navigate("/");
-    } catch (error) {
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Profile setup error:", error);
       toast({
         title: "Profile setup failed",
-        description: "There was a problem saving your profile",
+        description: error.message || "There was a problem saving your profile",
         variant: "destructive",
       });
     } finally {

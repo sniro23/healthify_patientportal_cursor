@@ -4,35 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate = useNavigate();
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Here you would typically integrate with Supabase or other auth provider
-      // For now, we'll simulate a successful password reset request
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      await resetPassword(email);
       setIsSubmitted(true);
-      
-      toast({
-        title: "Reset link sent",
-        description: "Check your email for password reset instructions",
-      });
-    } catch (error) {
-      toast({
-        title: "Request failed",
-        description: "There was a problem sending the reset link",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
