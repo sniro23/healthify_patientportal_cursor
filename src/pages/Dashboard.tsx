@@ -12,7 +12,7 @@ import { useAppointments } from "@/lib/hooks/useAppointments";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Dashboard = () => {
-  const { user } = useAuth(); // Remove profile reference as it doesn't exist in AuthContextType
+  const { user } = useAuth();
   const { getUpcomingAppointment, isLoading: appointmentsLoading } = useAppointments();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

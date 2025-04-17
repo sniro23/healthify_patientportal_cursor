@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/components/ui/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 // Define TypeScript interfaces for our health record data
 export interface PersonalInfo {
@@ -468,8 +469,19 @@ export const useHealthMetrics = () => {
         if (error) {
           console.error('Error fetching health metrics:', error);
         } else if (data && data.metrics) {
-          // Use type assertion to ensure data conforms to our type
-          setMetrics(data.metrics as Record<string, MetricData>);
+          // Parse JSON string if metrics is stored as a string
+          let parsedMetrics: Record<string, MetricData>;
+          if (typeof data.metrics === 'string') {
+            try {
+              parsedMetrics = JSON.parse(data.metrics) as Record<string, MetricData>;
+              setMetrics(parsedMetrics);
+            } catch (parseError) {
+              console.error('Error parsing metrics JSON:', parseError);
+            }
+          } else if (typeof data.metrics === 'object') {
+            // If it's already an object, cast it to our expected type
+            setMetrics(data.metrics as unknown as Record<string, MetricData>);
+          }
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -538,18 +550,26 @@ export const useHealthMetrics = () => {
         throw checkError;
       }
 
+      // Convert metrics to plain object suitable for JSON storage
+      const metricsForStorage = JSON.stringify(updatedMetrics);
+
       let result;
       if (existingData?.id) {
         // Update existing record - stringify the metrics for proper JSON storage
         result = await supabase
           .from('health_metrics')
-          .update({ metrics: JSON.stringify(updatedMetrics) })
+          .update({ 
+            metrics: metricsForStorage
+          })
           .eq('id', existingData.id);
       } else {
         // Insert new record - stringify the metrics for proper JSON storage
         result = await supabase
           .from('health_metrics')
-          .insert({ user_id: user.id, metrics: JSON.stringify(updatedMetrics) });
+          .insert({ 
+            user_id: user.id, 
+            metrics: metricsForStorage
+          });
       }
 
       if (result.error) {
@@ -605,14 +625,36 @@ export const useLabReports = () => {
           console.error('Error fetching lab reports:', error);
         } else if (data) {
           // Transform data to match our LabReport interface
-          const transformedData: LabReport[] = data.map(item => ({
-            id: item.id,
-            name: item.name,
-            date: item.date,
-            status: item.status as "normal" | "abnormal" | "pending", // Type assertion for status
-            fileUrl: item.fileurl || undefined,
-            testResults: item.testresults as LabTestResult[] | undefined
-          }));
+          const transformedData: LabReport[] = data.map(item => {
+            // Check status and make sure it conforms to our union type
+            let status: "normal" | "abnormal" | "pending" = "pending";
+            if (item.status === "normal" || item.status === "abnormal" || item.status === "pending") {
+              status = item.status as "normal" | "abnormal" | "pending";
+            }
+
+            // Parse testresults if they exist
+            let testResults: LabTestResult[] | undefined = undefined;
+            if (item.testresults) {
+              if (typeof item.testresults === 'string') {
+                try {
+                  testResults = JSON.parse(item.testresults) as LabTestResult[];
+                } catch (e) {
+                  console.error('Error parsing test results:', e);
+                }
+              } else if (Array.isArray(item.testresults)) {
+                testResults = item.testresults as unknown as LabTestResult[];
+              }
+            }
+
+            return {
+              id: item.id,
+              name: item.name,
+              date: item.date,
+              status: status,
+              fileUrl: item.fileurl || undefined,
+              testResults: testResults
+            };
+          });
           
           setReports(transformedData);
         }
@@ -642,8 +684,8 @@ export const useLabReports = () => {
         name: report.name,
         date: report.date, 
         status: report.status,
-        fileurl: report.fileUrl,
-        testresults: report.testResults,
+        fileurl: report.fileUrl || null,
+        testresults: report.testResults ? JSON.stringify(report.testResults) : null,
         user_id: user.id
       };
       
@@ -664,7 +706,11 @@ export const useLabReports = () => {
           date: data[0].date,
           status: data[0].status as "normal" | "abnormal" | "pending",
           fileUrl: data[0].fileurl || undefined,
-          testResults: data[0].testresults as LabTestResult[] | undefined
+          testResults: data[0].testresults ? 
+            (typeof data[0].testresults === 'string' ? 
+              JSON.parse(data[0].testresults) as LabTestResult[] : 
+              data[0].testresults as unknown as LabTestResult[]
+            ) : undefined
         };
         
         setReports([...reports, transformedReport]);
