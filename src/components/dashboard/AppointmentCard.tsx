@@ -11,6 +11,7 @@ interface AppointmentCardProps {
   time: string;
   type: "video" | "audio" | "text" | "in-person";
   status: "upcoming" | "completed" | "cancelled";
+  onClick?: () => void;
 }
 
 const AppointmentCard = ({
@@ -20,7 +21,8 @@ const AppointmentCard = ({
   date,
   time,
   type,
-  status
+  status,
+  onClick
 }: AppointmentCardProps) => {
   const navigate = useNavigate();
   
@@ -53,7 +55,11 @@ const AppointmentCard = ({
   };
   
   const handleViewDetails = () => {
-    navigate(`/appointments/${id}`);
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/appointments/${id}`);
+    }
   };
 
   return (

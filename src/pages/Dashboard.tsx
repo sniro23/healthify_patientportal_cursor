@@ -12,7 +12,7 @@ import { useAppointments } from "@/lib/hooks/useAppointments";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth(); // Remove profile reference as it doesn't exist in AuthContextType
   const { getUpcomingAppointment, isLoading: appointmentsLoading } = useAppointments();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const Dashboard = () => {
       {/* Welcome section with subscription */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold">Hello, {profile?.first_name || user?.email?.split('@')[0] || "there"}!</h1>
+          <h1 className="text-xl font-semibold">Hello, {user?.email?.split('@')[0] || "there"}!</h1>
           <p className="text-sm text-slate-600">Welcome to Healthify Patient Portal</p>
         </div>
         <SubscriptionBadge tier="Category B" />
@@ -75,7 +75,7 @@ const Dashboard = () => {
             date={new Date(upcomingAppointment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             time={upcomingAppointment.time_slot}
             type={upcomingAppointment.delivery_method === "video" ? "video" : 
-                 upcomingAppointment.delivery_method === "chat" ? "chat" : "in-person"}
+                 upcomingAppointment.delivery_method === "chat" ? "text" : "in-person"}
             status="upcoming"
           />
         ) : (

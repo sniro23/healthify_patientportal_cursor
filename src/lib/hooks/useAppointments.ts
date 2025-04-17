@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -58,7 +59,8 @@ export const useAppointments = () => {
           });
           setAppointments([]);
         } else {
-          setAppointments(data as Appointment[]);
+          // Use type assertion to ensure the data matches our Appointment interface
+          setAppointments((data as Appointment[]));
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -103,6 +105,7 @@ export const useAppointments = () => {
         return null;
       }
 
+      // Use type assertion to ensure the data matches our Appointment interface
       const createdAppointment = data as Appointment;
       
       setAppointments(prevAppointments => [...prevAppointments, createdAppointment]);
@@ -143,9 +146,12 @@ export const useAppointments = () => {
         return null;
       }
 
+      // Use type assertion for data from Supabase
+      const updatedAppointment = data as Appointment;
+      
       setAppointments(
         appointments.map(appointment => 
-          appointment.id === id ? data : appointment
+          appointment.id === id ? updatedAppointment : appointment
         )
       );
       
@@ -154,7 +160,7 @@ export const useAppointments = () => {
         description: "Your appointment has been updated successfully"
       });
       
-      return data;
+      return updatedAppointment;
     } catch (error) {
       console.error('Unexpected error:', error);
       return null;
@@ -169,7 +175,7 @@ export const useAppointments = () => {
     try {
       const { data, error } = await supabase
         .from('appointments')
-        .update({ status: 'cancelled' })
+        .update({ status: 'cancelled' as const })
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
@@ -185,9 +191,12 @@ export const useAppointments = () => {
         return false;
       }
 
+      // Use type assertion for data from Supabase
+      const cancelledAppointment = data as Appointment;
+      
       setAppointments(
         appointments.map(appointment => 
-          appointment.id === id ? data : appointment
+          appointment.id === id ? cancelledAppointment : appointment
         )
       );
       
@@ -226,7 +235,8 @@ export const useAppointments = () => {
         return null;
       }
 
-      return data;
+      // Use type assertion for data from Supabase
+      return data as Appointment;
     } catch (error) {
       console.error('Unexpected error:', error);
       return null;

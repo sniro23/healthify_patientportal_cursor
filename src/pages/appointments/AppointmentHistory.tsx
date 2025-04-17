@@ -25,6 +25,16 @@ const AppointmentHistory = () => {
       year: 'numeric'
     });
   };
+
+  // Map delivery method to the expected type in the AppointmentCard component
+  const mapDeliveryMethodToType = (method: string): "audio" | "video" | "text" | "in-person" => {
+    switch (method) {
+      case "video": return "video";
+      case "chat": return "text"; // Map chat to text as it's expected by AppointmentCard
+      case "in-person": return "in-person";
+      default: return "text"; // Default fallback
+    }
+  };
   
   if (isLoading) {
     return (
@@ -91,8 +101,7 @@ const AppointmentHistory = () => {
                 specialty={appointment.specialty || ""}
                 date={formatAppointmentDate(appointment.date)}
                 time={appointment.time_slot}
-                type={appointment.delivery_method === "video" ? "video" : 
-                     appointment.delivery_method === "chat" ? "chat" : "in-person"}
+                type={mapDeliveryMethodToType(appointment.delivery_method)}
                 status="upcoming"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />
@@ -115,8 +124,7 @@ const AppointmentHistory = () => {
                 specialty={appointment.specialty || ""}
                 date={formatAppointmentDate(appointment.date)}
                 time={appointment.time_slot}
-                type={appointment.delivery_method === "video" ? "video" : 
-                     appointment.delivery_method === "chat" ? "chat" : "in-person"}
+                type={mapDeliveryMethodToType(appointment.delivery_method)}
                 status="completed"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />
@@ -138,8 +146,7 @@ const AppointmentHistory = () => {
                 specialty={appointment.specialty || ""}
                 date={formatAppointmentDate(appointment.date)}
                 time={appointment.time_slot}
-                type={appointment.delivery_method === "video" ? "video" : 
-                     appointment.delivery_method === "chat" ? "chat" : "in-person"}
+                type={mapDeliveryMethodToType(appointment.delivery_method)}
                 status="cancelled"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -219,7 +220,7 @@ export const useVitalsInfo = () => {
         if (error) {
           console.error('Error fetching vitals info:', error);
         } else if (data) {
-          setVitals(data);
+          setVitals(data as VitalsInfo);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -340,7 +341,7 @@ export const useLifestyleInfo = () => {
         if (error) {
           console.error('Error fetching lifestyle info:', error);
         } else if (data) {
-          setLifestyle(data);
+          setLifestyle(data as LifestyleInfo);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -467,7 +468,8 @@ export const useHealthMetrics = () => {
         if (error) {
           console.error('Error fetching health metrics:', error);
         } else if (data && data.metrics) {
-          setMetrics(data.metrics);
+          // Use type assertion to ensure data conforms to our type
+          setMetrics(data.metrics as Record<string, MetricData>);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -538,16 +540,16 @@ export const useHealthMetrics = () => {
 
       let result;
       if (existingData?.id) {
-        // Update existing record
+        // Update existing record - stringify the metrics for proper JSON storage
         result = await supabase
           .from('health_metrics')
-          .update({ metrics: updatedMetrics })
+          .update({ metrics: JSON.stringify(updatedMetrics) })
           .eq('id', existingData.id);
       } else {
-        // Insert new record
+        // Insert new record - stringify the metrics for proper JSON storage
         result = await supabase
           .from('health_metrics')
-          .insert({ user_id: user.id, metrics: updatedMetrics });
+          .insert({ user_id: user.id, metrics: JSON.stringify(updatedMetrics) });
       }
 
       if (result.error) {
@@ -602,7 +604,17 @@ export const useLabReports = () => {
         if (error) {
           console.error('Error fetching lab reports:', error);
         } else if (data) {
-          setReports(data);
+          // Transform data to match our LabReport interface
+          const transformedData: LabReport[] = data.map(item => ({
+            id: item.id,
+            name: item.name,
+            date: item.date,
+            status: item.status as "normal" | "abnormal" | "pending", // Type assertion for status
+            fileUrl: item.fileurl || undefined,
+            testResults: item.testresults as LabTestResult[] | undefined
+          }));
+          
+          setReports(transformedData);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -625,8 +637,13 @@ export const useLabReports = () => {
     }
 
     try {
+      // Transform from our interface to match database structure
       const newReport = {
-        ...report,
+        name: report.name,
+        date: report.date, 
+        status: report.status,
+        fileurl: report.fileUrl,
+        testresults: report.testResults,
         user_id: user.id
       };
       
@@ -640,7 +657,17 @@ export const useLabReports = () => {
       }
 
       if (data && data.length > 0) {
-        setReports([...reports, data[0]]);
+        // Transform back to our interface structure
+        const transformedReport: LabReport = {
+          id: data[0].id,
+          name: data[0].name,
+          date: data[0].date,
+          status: data[0].status as "normal" | "abnormal" | "pending",
+          fileUrl: data[0].fileurl || undefined,
+          testResults: data[0].testresults as LabTestResult[] | undefined
+        };
+        
+        setReports([...reports, transformedReport]);
         
         toast({
           title: "Lab report added",
