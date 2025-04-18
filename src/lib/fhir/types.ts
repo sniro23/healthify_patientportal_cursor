@@ -1,3 +1,4 @@
+
 /**
  * FHIR Resource Types
  * Based on FHIR R4 (v4.0.1) standards
@@ -211,6 +212,89 @@ export interface FhirObservation extends FhirResource {
     };
     text?: string;
   }>;
+}
+
+// New types for Lab Reports and Health Metrics
+export interface LabTestResult {
+  testId: string;
+  testName: string;
+  value: string | number;
+  unit: string;
+  date?: string;
+  isAbnormal?: boolean;
+  referenceRange?: {
+    low?: number;
+    high?: number;
+    text?: string;
+  };
+}
+
+export interface LabReport {
+  id: string;
+  name: string;
+  date: string;
+  status: 'normal' | 'abnormal' | 'pending';
+  fileUrl?: string;
+  testResults?: LabTestResult[];
+}
+
+export interface MetricReading {
+  id: string;
+  date: string;
+  value: number;
+}
+
+export interface MetricData {
+  name: string;
+  unit: string;
+  normal_range?: {
+    min: number;
+    max: number;
+  };
+  readings: MetricReading[];
+}
+
+export interface PersonalInfo {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  phone: string;
+  email: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  bloodType?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+}
+
+export interface VitalsInfo {
+  id?: string;
+  height: number;
+  weight: number;
+  bmi?: number;
+  blood_pressure?: {
+    systolic: number;
+    diastolic: number;
+  };
+  heart_rate?: number;
+  temperature?: number;
+  respiratory_rate?: number;
+  oxygen_saturation?: number;
+  last_updated?: string;
+}
+
+export interface LifestyleInfo {
+  id?: string;
+  activity_level: "Sedentary" | "Light" | "Moderate" | "Active";
+  smoking_status: "Never" | "Former" | "Current";
+  alcohol_consumption: "None" | "Occasionally" | "Regularly" | "Frequently";
 }
 
 // Convert our app data to FHIR format
