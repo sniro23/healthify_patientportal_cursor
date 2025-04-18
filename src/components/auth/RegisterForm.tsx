@@ -26,10 +26,23 @@ const RegisterForm = () => {
       return;
     }
     
-    const success = await signUp(email, password);
-    if (success) {
-      // Successfully signed up and authenticated
-      navigate("/profile-setup");
+    try {
+      const success = await signUp(email, password);
+      if (success) {
+        // Successfully signed up and authenticated
+        toast({
+          title: "Account created",
+          description: "Please set up your profile to continue",
+        });
+        navigate("/profile-setup");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
     }
   };
 

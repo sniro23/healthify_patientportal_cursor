@@ -143,15 +143,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      toast({
-        title: 'Registration successful',
-        description: 'Welcome to Healthify Patient Portal',
-      });
-
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('hasCompletedProfile', 'false');
+      if (data.user) {
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('hasCompletedProfile', 'false');
+        
+        toast({
+          title: 'Registration successful',
+          description: 'Welcome to Healthify Patient Portal',
+        });
+        
+        return true;
+      }
       
-      return true;
+      return false;
     } catch (error) {
       console.error('Registration error:', error);
       toast({

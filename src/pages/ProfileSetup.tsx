@@ -16,8 +16,16 @@ const ProfileSetup = () => {
     const checkAuth = async () => {
       const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
       
+      // If not authenticated and no user, redirect to login
       if (!isAuthenticated && !user) {
         navigate("/login");
+        return;
+      }
+      
+      // If user has already completed profile, redirect to dashboard
+      const hasCompletedProfile = localStorage.getItem("hasCompletedProfile") === "true";
+      if (user && hasCompletedProfile) {
+        navigate("/dashboard");
         return;
       }
       

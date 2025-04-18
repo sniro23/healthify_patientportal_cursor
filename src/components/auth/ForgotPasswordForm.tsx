@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 const ForgotPasswordForm = () => {
@@ -20,6 +21,12 @@ const ForgotPasswordForm = () => {
     try {
       await resetPassword(email);
       setIsSubmitted(true);
+      toast({
+        title: "Reset link sent",
+        description: "If an account exists with this email, you'll receive a password reset link"
+      });
+    } catch (error) {
+      console.error("Password reset error:", error);
     } finally {
       setIsLoading(false);
     }
