@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Pencil, Plus, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -39,9 +38,13 @@ interface Medication {
   endDate?: string;
 }
 
-const MedicationsSection = () => {
+interface MedicationsSectionProps {
+  isEditing: boolean;
+}
+
+const MedicationsSection: React.FC<MedicationsSectionProps> = ({ isEditing }) => {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
   const [medications, setMedications] = useState<Medication[]>([
     {
       id: "med1",
@@ -70,6 +73,10 @@ const MedicationsSection = () => {
   const [searchResults, setSearchResults] = useState<MedicationOption[]>([]);
   const [selectedMedication, setSelectedMedication] = useState<MedicationOption | null>(null);
   
+  useEffect(() => {
+    setLocalIsEditing(isEditing);
+  }, [isEditing]);
+
   useEffect(() => {
     if (searchQuery.length >= 2) {
       const results = searchMedications(searchQuery);
@@ -165,7 +172,7 @@ const MedicationsSection = () => {
           variant="ghost" 
           size="sm" 
           className="h-8 px-2"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setLocalIsEditing(true)}
         >
           <Pencil className="w-3 h-3 mr-1" />
           Edit
@@ -201,7 +208,7 @@ const MedicationsSection = () => {
         <p className="text-sm text-slate-400 italic">No current medications</p>
       )}
       
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={localIsEditing} onOpenChange={setLocalIsEditing}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Medications</DialogTitle>
@@ -393,7 +400,7 @@ const MedicationsSection = () => {
             </div>
             
             <div className="flex justify-end gap-2 pt-4 border-t mt-4">
-              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+              <Button type="button" variant="outline" onClick={() => setLocalIsEditing(false)}>
                 Close
               </Button>
             </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/layout/PageContainer";
@@ -10,27 +9,72 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useAppointments } from "@/lib/hooks/useAppointments";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { getUpcomingAppointment, isLoading: appointmentsLoading } = useAppointments();
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Simulate loading data
+    // Fetch user profile data
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      try {
+        console.log("Fetching profile for user:", user.id);
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching profile:", error);
+          return;
+        }
+        
+        console.log("Profile data:", data);
+        setUserProfile(data);
+      } catch (err) {
+        console.error("Unexpected error fetching profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
+    
+    // Simulate loading data for other components
     const timer = setTimeout(() => {
       setLoading(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [user]);
   
   // Get the next upcoming appointment
   const upcomingAppointment = getUpcomingAppointment();
   
   const handleNewAppointment = () => {
     navigate("/appointments/book");
+  };
+
+  // Get user's display name
+  const getUserDisplayName = () => {
+    // First try to use the profile name
+    if (userProfile?.first_name) {
+      if (userProfile.last_name) {
+        return `${userProfile.first_name} ${userProfile.last_name}`;
+      }
+      return userProfile.first_name;
+    }
+    
+    // Fallback to email prefix
+    return user?.email?.split('@')[0] || "there";
   };
 
   if (loading || appointmentsLoading) {
@@ -46,7 +90,7 @@ const Dashboard = () => {
       {/* Welcome section with subscription */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold">Hello, {user?.email?.split('@')[0] || "there"}!</h1>
+          <h1 className="text-xl font-semibold">Hello, {getUserDisplayName()}!</h1>
           <p className="text-sm text-slate-600">Welcome to Healthify Patient Portal</p>
         </div>
         <SubscriptionBadge tier="Category B" />

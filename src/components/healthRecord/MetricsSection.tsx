@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Pencil, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -35,9 +34,13 @@ interface MetricData {
   readings: MetricReading[];
 }
 
-const MetricsSection = () => {
+interface MetricsSectionProps {
+  isEditing: boolean;
+}
+
+const MetricsSection: React.FC<MetricsSectionProps> = ({ isEditing }) => {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   
   const [metrics, setMetrics] = useState<Record<string, MetricData>>({
@@ -91,6 +94,10 @@ const MetricsSection = () => {
     date: new Date().toISOString().split('T')[0],
     value: ""
   });
+  
+  useEffect(() => {
+    setLocalIsEditing(isEditing);
+  }, [isEditing]);
   
   const handleAddReading = () => {
     if (!newReading.metricKey || !newReading.value) {
@@ -186,7 +193,7 @@ const MetricsSection = () => {
           variant="ghost" 
           size="sm" 
           className="h-8 px-2"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setLocalIsEditing(true)}
         >
           <Pencil className="w-3 h-3 mr-1" />
           Add Reading
@@ -253,7 +260,7 @@ const MetricsSection = () => {
         ))}
       </div>
       
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={localIsEditing} onOpenChange={setLocalIsEditing}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Health Metric Reading</DialogTitle>
@@ -306,7 +313,7 @@ const MetricsSection = () => {
             </div>
             
             <div className="flex justify-end gap-2 pt-4 mt-4">
-              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+              <Button type="button" variant="outline" onClick={() => setLocalIsEditing(false)}>
                 Cancel
               </Button>
               <Button 

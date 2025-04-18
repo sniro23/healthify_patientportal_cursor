@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -53,18 +52,42 @@ export const useLifestyleInfo = () => {
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please log in to update your information",
+        description: "Please log in to update your lifestyle information",
         variant: "destructive"
       });
       return false;
     }
 
     try {
+      // First, check if profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        // If profile doesn't exist, create it with just the id
+        const { error: createProfileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (createProfileError) {
+          throw createProfileError;
+        }
+      }
+
       const lifestyleForDb = {
         user_id: user.id,
-        activity_level: updatedInfo.activity_level || lifestyle.activity_level,
-        smoking_status: updatedInfo.smoking_status || lifestyle.smoking_status,
-        alcohol_consumption: updatedInfo.alcohol_consumption || lifestyle.alcohol_consumption
+        activity_level: updatedInfo.activity_level || lifestyle.activity_level || 'Moderate',
+        smoking_status: updatedInfo.smoking_status || lifestyle.smoking_status || 'Never',
+        alcohol_consumption: updatedInfo.alcohol_consumption || lifestyle.alcohol_consumption || 'None',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
       // Check if record exists
@@ -94,11 +117,10 @@ export const useLifestyleInfo = () => {
         throw result.error;
       }
 
-      // Update local state
-      setLifestyle({
-        ...lifestyle,
+      setLifestyle(prev => ({
+        ...prev,
         ...updatedInfo
-      });
+      }));
       
       toast({
         title: "Lifestyle updated",

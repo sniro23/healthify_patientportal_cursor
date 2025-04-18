@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import PageContainer from "@/components/layout/PageContainer";
 import { 
@@ -7,6 +6,38 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
+import type { Json } from '@supabase/supabase-js'
+import type { LabTestResult, MetricData } from '../types'
+
+// --- Type‐guard for LabTestResult[] ---
+function isLabTestResultArray(data: unknown): data is LabTestResult[] {
+  return (
+    Array.isArray(data) &&
+    data.every(item =>
+      typeof item === 'object' &&
+      item !== null &&
+      'testId' in item &&
+      'value' in item
+    )
+  )
+}
+
+// --- Type‐guard for MetricData Record<string,MetricData> ---
+function isMetricDataRecord(data: unknown): data is Record<string, MetricData> {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    !Array.isArray(data) &&
+    Object.values(data).every(
+      v =>
+        typeof v === 'object' &&
+        v !== null &&
+        'timestamp' in v &&
+        'value' in v
+    )
+  )
+}
+
 import PersonalInfoSection from "@/components/healthRecord/PersonalInfoSection";
 import VitalsSection from "@/components/healthRecord/VitalsSection";
 import LifestyleSection from "@/components/healthRecord/LifestyleSection";
@@ -21,6 +52,7 @@ import { useToast } from "@/components/ui/use-toast";
 const HealthRecord = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("personal");
+  const [isEditing, setIsEditing] = useState(false);
   
   const handleDownloadSummary = () => {
     toast({
@@ -30,9 +62,10 @@ const HealthRecord = () => {
   };
   
   const handleEditProfile = () => {
+    setIsEditing(!isEditing);
     toast({
-      title: "Edit mode enabled",
-      description: "You can now edit your health record information",
+      title: isEditing ? "Edit mode disabled" : "Edit mode enabled",
+      description: isEditing ? "You can no longer edit your health record information" : "You can now edit your health record information",
     });
   };
   
@@ -49,7 +82,7 @@ const HealthRecord = () => {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleEditProfile}>
             <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
+            {isEditing ? "Stop Editing" : "Edit Profile"}
           </Button>
           <Button 
             variant="outline" 
@@ -65,19 +98,19 @@ const HealthRecord = () => {
       
       {/* Desktop Full View */}
       <div className="hidden md:block bg-white rounded-lg border border-slate-200 p-6 mb-6">
-        <PersonalInfoSection />
+        <PersonalInfoSection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <VitalsSection />
+        <VitalsSection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <LifestyleSection />
+        <LifestyleSection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <MedicalHistorySection />
+        <MedicalHistorySection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <MedicationsSection />
+        <MedicationsSection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <MetricsSection />
+        <MetricsSection isEditing={isEditing} />
         <div className="border-t my-4" />
-        <LabReportsSection />
+        <LabReportsSection isEditing={isEditing} />
       </div>
       
       {/* Mobile Tabbed View */}
@@ -99,31 +132,31 @@ const HealthRecord = () => {
           
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <TabsContent value="personal">
-              <PersonalInfoSection />
+              <PersonalInfoSection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="vitals">
-              <VitalsSection />
+              <VitalsSection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="lifestyle">
-              <LifestyleSection />
+              <LifestyleSection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="medical">
-              <MedicalHistorySection />
+              <MedicalHistorySection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="medications">
-              <MedicationsSection />
+              <MedicationsSection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="metrics">
-              <MetricsSection />
+              <MetricsSection isEditing={isEditing} />
             </TabsContent>
             
             <TabsContent value="lab">
-              <LabReportsSection />
+              <LabReportsSection isEditing={isEditing} />
             </TabsContent>
           </div>
         </Tabs>

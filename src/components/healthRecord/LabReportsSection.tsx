@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { 
   FileText, 
@@ -50,7 +49,11 @@ interface LabTestResult {
   loincCode?: string;
 }
 
-const LabReportsSection = () => {
+interface LabReportsSectionProps {
+  isEditing: boolean;
+}
+
+const LabReportsSection: React.FC<LabReportsSectionProps> = ({ isEditing }) => {
   const { toast } = useToast();
   const [newReport, setNewReport] = useState<Partial<LabReport>>({
     name: "",
@@ -120,6 +123,12 @@ const LabReportsSection = () => {
   const [selectedTest, setSelectedTest] = useState<LabTestDefinition | null>(null);
   const [addingTestResult, setAddingTestResult] = useState(false);
   
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
+  
+  useEffect(() => {
+    setLocalIsEditing(isEditing);
+  }, [isEditing]);
+
   useEffect(() => {
     if (testSearchQuery.length >= 2) {
       const results = searchLabTests(testSearchQuery);

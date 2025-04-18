@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Pencil, Plus, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -41,9 +40,13 @@ interface MedicalHistoryInfo {
   allergies: Allergy[];
 }
 
-const MedicalHistorySection = () => {
+interface MedicalHistorySectionProps {
+  isEditing: boolean;
+}
+
+const MedicalHistorySection: React.FC<MedicalHistorySectionProps> = ({ isEditing }) => {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
   const [editMode, setEditMode] = useState<"conditions" | "surgeries" | "allergies" | null>(null);
   const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryInfo>({
     conditions: [
@@ -67,13 +70,14 @@ const MedicalHistorySection = () => {
   const [selectedCondition, setSelectedCondition] = useState<ConditionOption | null>(null);
   
   useEffect(() => {
+    setLocalIsEditing(isEditing);
     if (conditionSearchQuery.length >= 2) {
       const results = searchConditions(conditionSearchQuery);
       setConditionSearchResults(results);
     } else {
       setConditionSearchResults([]);
     }
-  }, [conditionSearchQuery]);
+  }, [isEditing, conditionSearchQuery]);
 
   const handleConditionSelect = (condition: ConditionOption) => {
     setSelectedCondition(condition);
@@ -218,7 +222,7 @@ const MedicalHistorySection = () => {
           variant="ghost" 
           size="sm" 
           className="h-8 px-2"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setLocalIsEditing(true)}
         >
           <Pencil className="w-3 h-3 mr-1" />
           Edit
@@ -272,7 +276,7 @@ const MedicalHistorySection = () => {
         </div>
       </div>
       
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={localIsEditing} onOpenChange={setLocalIsEditing}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Edit Medical History</DialogTitle>
@@ -499,7 +503,7 @@ const MedicalHistorySection = () => {
             
             <div className="flex justify-end gap-2 pt-4 border-t mt-4">
               <Button type="button" variant="outline" onClick={() => {
-                setIsEditing(false);
+                setLocalIsEditing(false);
                 setEditMode(null);
               }}>
                 Close

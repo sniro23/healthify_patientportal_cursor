@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Setup Guide - Healthify Patient Portal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #9D5A8F;
+            border-bottom: 2px solid #9D5A8F;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #7B3578;
+            margin-top: 30px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .step {
+            background-color: #f9f9f9;
+            border-left: 4px solid #9D5A8F;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .warning {
+            background-color: #fff8e6;
+            border-left: 4px solid #ffb703;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .copy-button {
+            background-color: #9D5A8F;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .copy-button:hover {
+            background-color: #7B3578;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Setup Guide for Healthify Patient Portal</h1>
+    <p>This guide will help you set up your Supabase database for use with the Healthify Patient Portal application.</p>
+
+    <div class="step">
+        <h2>Step 1: Access the Supabase Dashboard</h2>
+        <ol>
+            <li>Log in to the Supabase dashboard at <a href="https://app.supabase.com" target="_blank">https://app.supabase.com</a></li>
+            <li>Select your project (tjxrhzrpariazxrclbfm)</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>Step 2: Set Up Database Tables</h2>
+        <ol>
+            <li>In the left sidebar, click on "SQL Editor"</li>
+            <li>Click "New Query"</li>
+            <li>Copy and paste the SQL code below</li>
+            <li>Click "Run" to execute the SQL script</li>
+        </ol>
+
+        <pre id="sql-code">-- Enable UUID extension for uuid_generate_v4() function
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create profiles table
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  date_of_birth TEXT,
+  gender TEXT,
+  phone TEXT,
+  address TEXT,
+  blood_group TEXT,
+  height NUMERIC,
+  weight NUMERIC,
+  emergency_contact TEXT,
+  emergency_contact_phone TEXT,
+  has_completed_profile BOOLEAN DEFAULT FALSE,
+  profile_image_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create appointments table
+CREATE TABLE IF NOT EXISTS public.appointments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  provider_type TEXT NOT NULL,
+  specialty TEXT,
+  consultation_type TEXT NOT NULL,
+  delivery_method TEXT NOT NULL,
+  date TEXT NOT NULL,
+  time_slot TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'scheduled',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create health_metrics table
+CREATE TABLE IF NOT EXISTS public.health_metrics (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  metrics JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create health_personal_info table
+CREATE TABLE IF NOT EXISTS public.health_personal_info (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  full_name TEXT NOT NULL,
+  gender TEXT NOT NULL,
+  age INTEGER NOT NULL,
+  address TEXT NOT NULL,
+  marital_status TEXT NOT NULL,
+  children INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create health_vitals table
+CREATE TABLE IF NOT EXISTS public.health_vitals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  height NUMERIC NOT NULL,
+  weight NUMERIC NOT NULL,
+  bmi NUMERIC NOT NULL,
+  blood_group TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create health_lifestyle table
+CREATE TABLE IF NOT EXISTS public.health_lifestyle (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  activity_level TEXT NOT NULL,
+  smoking_status TEXT NOT NULL,
+  alcohol_consumption TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create health_lab_reports table
+CREATE TABLE IF NOT EXISTS public.health_lab_reports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  name TEXT NOT NULL,
+  date TEXT NOT NULL,
+  status TEXT NOT NULL,
+  testresults JSONB,
+  fileurl TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create medications table
+CREATE TABLE IF NOT EXISTS public.medications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.profiles(id),
+  name TEXT NOT NULL,
+  dosage TEXT NOT NULL,
+  frequency TEXT NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT,
+  prescribed_by TEXT,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable row level security (RLS) for all tables
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_personal_info ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_vitals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_lifestyle ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_lab_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.medications ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for access control
+-- Profiles table policies
+CREATE POLICY "Users can view their own profile" ON public.profiles
+  FOR SELECT USING (auth.uid() = id);
+  
+CREATE POLICY "Users can update their own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- For each table, create policies that only allow access to the user's own data
+CREATE POLICY "Users can view their own appointments" ON public.appointments
+  FOR SELECT USING (auth.uid() = user_id);
+  
+CREATE POLICY "Users can insert their own appointments" ON public.appointments
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  
+CREATE POLICY "Users can update their own appointments" ON public.appointments
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Repeat for other tables
+CREATE POLICY "Users can view their own health metrics" ON public.health_metrics
+  FOR SELECT USING (auth.uid() = user_id);
+  
+CREATE POLICY "Users can insert their own health metrics" ON public.health_metrics
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  
+CREATE POLICY "Users can update their own health metrics" ON public.health_metrics
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Create function to get current user profile
+CREATE OR REPLACE FUNCTION public.get_current_profile()
+RETURNS public.profiles
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT *
+  FROM public.profiles
+  WHERE id = auth.uid()
+$$;</pre>
+        <button class="copy-button" onclick="copyToClipboard('sql-code')">Copy SQL Code</button>
+    </div>
+
+    <div class="step">
+        <h2>Step 3: Verify Table Creation</h2>
+        <ol>
+            <li>In the left sidebar, click on "Table Editor"</li>
+            <li>You should see all the tables listed:
+                <ul>
+                    <li>profiles</li>
+                    <li>appointments</li>
+                    <li>health_metrics</li>
+                    <li>health_personal_info</li>
+                    <li>health_vitals</li>
+                    <li>health_lifestyle</li>
+                    <li>health_lab_reports</li>
+                    <li>medications</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>Step 4: Configure Authentication</h2>
+        <ol>
+            <li>In the left sidebar, click on "Authentication"</li>
+            <li>Under "Providers", make sure "Email" is enabled</li>
+            <li>Under "URL Configuration", set the Site URL to your local development URL (e.g., http://localhost:8083)</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>Step 5: Test the Connection from the App</h2>
+        <ol>
+            <li>Run the development server: <code>npm run dev</code></li>
+            <li>Navigate to the diagnostic page: <code>http://localhost:8083/diagnostic</code></li>
+            <li>Click "Test Supabase Connection" to verify connectivity</li>
+            <li>If successful, you should see "✅ Supabase connection successful"</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <h2>Troubleshooting</h2>
+        <p>If you encounter issues:</p>
+        <ul>
+            <li><strong>Database Connection Errors</strong>: Check that your Supabase URL and anonymous key are correctly set in the <code>.env</code> file.</li>
+            <li><strong>Missing Tables</strong>: Make sure you executed the SQL script in the Supabase SQL Editor.</li>
+            <li><strong>Authentication Issues</strong>: Check that email authentication is enabled and the Site URL is set correctly.</li>
+            <li><strong>SQL Errors</strong>: If the SQL script fails, you may need to execute it in parts or check for specific error messages.</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h2>Next Steps</h2>
+        <p>After successful setup:</p>
+        <ol>
+            <li>Use the Register page to create a new user account</li>
+            <li>Complete the profile setup</li>
+            <li>Explore the app's features</li>
+        </ol>
+    </div>
+
+    <p>Your Healthify Patient Portal should now be fully connected to your Supabase backend!</p>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                const button = document.querySelector('.copy-button');
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy SQL Code';
+                }, 2000);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html> 

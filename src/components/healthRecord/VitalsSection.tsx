@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -21,9 +20,17 @@ import { Badge } from "@/components/ui/badge";
 import { useVitalsInfo } from "@/lib/hooks/useHealthRecord";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-const VitalsSection = () => {
+interface VitalsSectionProps {
+  isEditing: boolean;
+}
+
+const VitalsSection: React.FC<VitalsSectionProps> = ({ isEditing }) => {
   const { vitals, updateVitalsInfo, isLoading } = useVitalsInfo();
-  const [isEditing, setIsEditing] = useState(false);
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
+  
+  useEffect(() => {
+    setLocalIsEditing(isEditing);
+  }, [isEditing]);
   
   const getBMICategory = (bmi: number): { category: string; color: string } => {
     if (bmi < 18.5) return { category: "Underweight", color: "bg-blue-100 text-blue-800" };
@@ -35,7 +42,7 @@ const VitalsSection = () => {
   const handleSave = async (updatedInfo: Partial<typeof vitals>) => {
     const success = await updateVitalsInfo(updatedInfo);
     if (success) {
-      setIsEditing(false);
+      setLocalIsEditing(false);
     }
   };
   
@@ -53,7 +60,7 @@ const VitalsSection = () => {
           variant="ghost" 
           size="sm" 
           className="h-8 px-2"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setLocalIsEditing(true)}
         >
           <Pencil className="w-3 h-3 mr-1" />
           Edit
@@ -87,7 +94,7 @@ const VitalsSection = () => {
         </div>
       </div>
       
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={localIsEditing} onOpenChange={setLocalIsEditing}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Vitals & Biometrics</DialogTitle>
@@ -149,7 +156,7 @@ const VitalsSection = () => {
             </div>
             
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+              <Button type="button" variant="outline" onClick={() => setLocalIsEditing(false)}>
                 Cancel
               </Button>
               <Button type="submit">

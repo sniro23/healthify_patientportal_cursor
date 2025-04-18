@@ -296,6 +296,16 @@ export interface LifestyleInfo {
   alcohol_consumption: "None" | "Occasionally" | "Regularly" | "Frequently";
 }
 
+export interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  start_date?: string;
+  end_date?: string;
+  notes?: string;
+}
+
 // Convert our app data to FHIR format
 export function toFhirPatient(patientData: any): FhirPatient {
   return {

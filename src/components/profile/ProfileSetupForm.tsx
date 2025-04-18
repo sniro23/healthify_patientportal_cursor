@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,42 @@ const ProfileSetupForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Add this effect to load existing profile data when component mounts
+  useEffect(() => {
+    const loadExistingProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) {
+          console.error("Error loading existing profile data:", error);
+          return;
+        }
+        
+        // If we have a name, pre-fill the form
+        if (data?.first_name) {
+          const fullName = data.last_name 
+            ? `${data.first_name} ${data.last_name}` 
+            : data.first_name;
+            
+          setPersonalInfo(prev => ({
+            ...prev,
+            fullName
+          }));
+        }
+      } catch (err) {
+        console.error("Unexpected error loading profile:", err);
+      }
+    };
+    
+    loadExistingProfile();
+  }, [user]);
 
   const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -66,6 +65,28 @@ export const usePersonalInfo = () => {
     }
 
     try {
+      // First, check if profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        // If profile doesn't exist, create it with just the id
+        const { error: createProfileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (createProfileError) {
+          throw createProfileError;
+        }
+      }
+
       const personalInfoForDb = {
         user_id: user.id,
         full_name: updatedInfo.full_name || personalInfo.full_name,

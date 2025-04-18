@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const RegisterForm = () => {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,6 +30,34 @@ const RegisterForm = () => {
     try {
       const success = await signUp(email, password);
       if (success) {
+        // Store full name in localStorage temporarily
+        if (fullName) {
+          localStorage.setItem("tempFullName", fullName);
+        }
+        
+        // Get the current user and update their profile
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id && fullName) {
+          // Parse the fullName into first_name and last_name
+          const nameParts = fullName.split(" ");
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+          
+          // Update the profile with the name
+          const { error } = await supabase
+            .from('profiles')
+            .update({
+              first_name: firstName,
+              last_name: lastName,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', session.user.id);
+            
+          if (error) {
+            console.error("Error updating profile name:", error);
+          }
+        }
+        
         // Successfully signed up and authenticated
         toast({
           title: "Account created",
@@ -48,6 +77,18 @@ const RegisterForm = () => {
 
   return (
     <form onSubmit={handleRegister} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Full Name</Label>
+        <Input
+          id="fullName"
+          type="text"
+          placeholder="John Doe"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
+      </div>
+      
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

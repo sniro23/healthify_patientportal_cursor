@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -20,14 +19,22 @@ import {
 import { usePersonalInfo } from "@/lib/hooks/useHealthRecord";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-const PersonalInfoSection = () => {
+interface PersonalInfoSectionProps {
+  isEditing: boolean;
+}
+
+const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ isEditing }) => {
   const { personalInfo, updatePersonalInfo, isLoading } = usePersonalInfo();
-  const [isEditing, setIsEditing] = useState(false);
+  const [localIsEditing, setLocalIsEditing] = useState(isEditing);
+  
+  useEffect(() => {
+    setLocalIsEditing(isEditing);
+  }, [isEditing]);
   
   const handleSave = async (updatedInfo: Partial<typeof personalInfo>) => {
     const success = await updatePersonalInfo(updatedInfo);
     if (success) {
-      setIsEditing(false);
+      setLocalIsEditing(false);
     }
   };
   
@@ -43,7 +50,8 @@ const PersonalInfoSection = () => {
           variant="ghost" 
           size="sm" 
           className="h-8 px-2"
-          onClick={() => setIsEditing(true)}
+          onClick={() => setLocalIsEditing(true)}
+          disabled={localIsEditing}
         >
           <Pencil className="w-3 h-3 mr-1" />
           Edit
@@ -82,7 +90,7 @@ const PersonalInfoSection = () => {
         </div>
       </div>
       
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={localIsEditing} onOpenChange={setLocalIsEditing}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Personal Information</DialogTitle>
@@ -175,7 +183,7 @@ const PersonalInfoSection = () => {
             </div>
             
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+              <Button type="button" variant="outline" onClick={() => setLocalIsEditing(false)}>
                 Cancel
               </Button>
               <Button type="submit">
