@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -52,11 +51,13 @@ const BookAppointment = () => {
       // Determine next page based on consultation type
       switch (consultationType) {
         case "Urgent":
-          nextPage = "/appointments/urgent";
+          nextPage = "/appointments/urgent-consultation";
           break;
         case "Scheduled":
-          nextPage = "/appointments/scheduled";
+          nextPage = "/appointments/scheduled-consultation";
           break;
+        default:
+          nextPage = "/appointments/scheduled-consultation";
       }
       
       // Navigate to the appropriate page with the selection as state

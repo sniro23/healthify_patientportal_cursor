@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageContainer from "@/components/layout/PageContainer";
@@ -133,7 +132,7 @@ const UrgentConsultation = () => {
   
   // Handle switching to scheduled appointment
   const handleSwitchToScheduled = () => {
-    navigate("/appointments/scheduled", {
+    navigate("/appointments/scheduled-consultation", {
       state: {
         providerType,
         consultationType: "Scheduled",

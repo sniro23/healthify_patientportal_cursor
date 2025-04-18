@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format, addDays } from "date-fns";
@@ -6,7 +5,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+import { SimplifiedCombobox, ComboboxOption } from "@/components/ui/simplified-combobox";
 import { Loader2, CalendarIcon, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -130,7 +129,7 @@ const ScheduledConsultation = () => {
           <div className="space-y-6">
             <div>
               <label className="text-sm font-medium mb-1 block">Specialty</label>
-              <Combobox
+              <SimplifiedCombobox
                 options={specialtyOptions}
                 value={specialty}
                 onSelect={(value) => setSpecialty(value as MedicalSpecialty)}

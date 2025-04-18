@@ -147,7 +147,23 @@ const App = () => {
               </ErrorBoundary>
             } />
             
+            <Route path="/appointments/urgent-consultation" element={
+              <ErrorBoundary>
+                <AuthProvider>
+                  <UrgentConsultation />
+                </AuthProvider>
+              </ErrorBoundary>
+            } />
+            
             <Route path="/appointments/scheduled" element={
+              <ErrorBoundary>
+                <AuthProvider>
+                  <ScheduledConsultation />
+                </AuthProvider>
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/appointments/scheduled-consultation" element={
               <ErrorBoundary>
                 <AuthProvider>
                   <ScheduledConsultation />

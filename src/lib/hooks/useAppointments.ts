@@ -1,33 +1,86 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/components/ui/use-toast';
+import { 
+  ProviderType,
+  ConsultationType,
+  DeliveryMethod,
+  MedicalSpecialty,
+  AppointmentStatus
+} from '@/lib/models/appointment';
 
-export interface Appointment {
+// Database interface (snake_case)
+interface DbAppointment {
   id: string;
-  user_id: string;
+  patient_id: string;
   provider_type: string;
-  specialty?: string | null;
+  specialty: string | null;
   consultation_type: string;
   delivery_method: string;
-  date: string;
-  time_slot: string;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
-  notes?: string | null;
+  scheduled_date: string;
+  scheduled_time: string;
+  status: string;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
 
+// Application interface (camelCase)
+export interface Appointment {
+  id: string;
+  patientId: string;
+  providerType: ProviderType;
+  specialty?: MedicalSpecialty;
+  consultationType: ConsultationType;
+  deliveryMethod: DeliveryMethod;
+  scheduledDate: string;
+  scheduledTime: string;
+  status: AppointmentStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewAppointment {
-  provider_type: string;
-  specialty?: string;
-  consultation_type: string;
-  delivery_method: string;
-  date: string;
-  time_slot: string;
+  providerType: ProviderType;
+  specialty?: MedicalSpecialty;
+  consultationType: ConsultationType;
+  deliveryMethod: DeliveryMethod;
+  scheduledDate: string;
+  scheduledTime: string;
   notes?: string;
 }
+
+// Helper functions to transform between database and application formats
+const toDbFormat = (appointment: NewAppointment | Partial<Appointment>): Partial<DbAppointment> => {
+  return {
+    provider_type: appointment.providerType,
+    specialty: appointment.specialty || null,
+    consultation_type: appointment.consultationType,
+    delivery_method: appointment.deliveryMethod,
+    scheduled_date: appointment.scheduledDate,
+    scheduled_time: appointment.scheduledTime,
+    notes: appointment.notes || null
+  };
+};
+
+const toAppFormat = (dbAppointment: DbAppointment): Appointment => {
+  return {
+    id: dbAppointment.id,
+    patientId: dbAppointment.patient_id,
+    providerType: dbAppointment.provider_type as ProviderType,
+    specialty: dbAppointment.specialty as MedicalSpecialty,
+    consultationType: dbAppointment.consultation_type as ConsultationType,
+    deliveryMethod: dbAppointment.delivery_method as DeliveryMethod,
+    scheduledDate: dbAppointment.scheduled_date,
+    scheduledTime: dbAppointment.scheduled_time,
+    status: dbAppointment.status as AppointmentStatus,
+    notes: dbAppointment.notes || undefined,
+    createdAt: dbAppointment.created_at,
+    updatedAt: dbAppointment.updated_at
+  };
+};
 
 export const useAppointments = () => {
   const { user } = useAuth();
@@ -47,8 +100,8 @@ export const useAppointments = () => {
         const { data, error } = await supabase
           .from('appointments')
           .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: true });
+          .eq('patient_id', user.id)
+          .order('scheduled_date', { ascending: true });
 
         if (error) {
           console.error('Error fetching appointments:', error);
@@ -59,8 +112,7 @@ export const useAppointments = () => {
           });
           setAppointments([]);
         } else {
-          // Use type assertion to ensure the data matches our Appointment interface
-          setAppointments((data as Appointment[]));
+          setAppointments(data.map(toAppFormat));
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -83,10 +135,40 @@ export const useAppointments = () => {
     }
 
     try {
+      // First, check if profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        // If profile doesn't exist, create it with just the id
+        const { error: createProfileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (createProfileError) {
+          throw createProfileError;
+        }
+      }
+
       const newAppointment = {
-        ...appointmentData,
-        user_id: user.id,
-        status: 'scheduled' as const
+        patient_id: user.id,
+        provider_type: appointmentData.providerType,
+        specialty: appointmentData.specialty || null,
+        consultation_type: appointmentData.consultationType,
+        delivery_method: appointmentData.deliveryMethod,
+        scheduled_date: appointmentData.scheduledDate,
+        scheduled_time: appointmentData.scheduledTime,
+        status: 'Confirmed',
+        notes: appointmentData.notes || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       const { data, error } = await supabase
@@ -105,9 +187,7 @@ export const useAppointments = () => {
         return null;
       }
 
-      // Use type assertion to ensure the data matches our Appointment interface
-      const createdAppointment = data as Appointment;
-      
+      const createdAppointment = toAppFormat(data as DbAppointment);
       setAppointments(prevAppointments => [...prevAppointments, createdAppointment]);
       
       toast({
@@ -118,6 +198,11 @@ export const useAppointments = () => {
       return createdAppointment;
     } catch (error) {
       console.error('Unexpected error:', error);
+      toast({
+        title: "Booking failed",
+        description: "An unexpected error occurred while booking your appointment",
+        variant: "destructive"
+      });
       return null;
     }
   };
@@ -130,9 +215,9 @@ export const useAppointments = () => {
     try {
       const { data, error } = await supabase
         .from('appointments')
-        .update(updates)
+        .update(toDbFormat(updates))
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('patient_id', user.id)
         .select()
         .single();
 
@@ -146,11 +231,9 @@ export const useAppointments = () => {
         return null;
       }
 
-      // Use type assertion for data from Supabase
-      const updatedAppointment = data as Appointment;
-      
-      setAppointments(
-        appointments.map(appointment => 
+      const updatedAppointment = toAppFormat(data as DbAppointment);
+      setAppointments(prev => 
+        prev.map(appointment => 
           appointment.id === id ? updatedAppointment : appointment
         )
       );
@@ -175,9 +258,9 @@ export const useAppointments = () => {
     try {
       const { data, error } = await supabase
         .from('appointments')
-        .update({ status: 'cancelled' as const })
+        .update({ status: 'Cancelled' })
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('patient_id', user.id)
         .select()
         .single();
 
@@ -191,11 +274,9 @@ export const useAppointments = () => {
         return false;
       }
 
-      // Use type assertion for data from Supabase
-      const cancelledAppointment = data as Appointment;
-      
-      setAppointments(
-        appointments.map(appointment => 
+      const cancelledAppointment = toAppFormat(data as DbAppointment);
+      setAppointments(prev => 
+        prev.map(appointment => 
           appointment.id === id ? cancelledAppointment : appointment
         )
       );
@@ -227,7 +308,7 @@ export const useAppointments = () => {
         .from('appointments')
         .select('*')
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('patient_id', user.id)
         .single();
 
       if (error) {
@@ -235,8 +316,7 @@ export const useAppointments = () => {
         return null;
       }
 
-      // Use type assertion for data from Supabase
-      return data as Appointment;
+      return toAppFormat(data as DbAppointment);
     } catch (error) {
       console.error('Unexpected error:', error);
       return null;
@@ -249,26 +329,24 @@ export const useAppointments = () => {
     }
 
     const now = new Date();
-    const upcoming = appointments
+    return appointments
       .filter(appointment => 
-        appointment.status === 'scheduled' && 
-        new Date(`${appointment.date}T${appointment.time_slot.split(' - ')[0]}`) > now
+        appointment.status === 'Confirmed' && 
+        new Date(`${appointment.scheduledDate}T${appointment.scheduledTime.split(' - ')[0]}`) > now
       )
       .sort((a, b) => 
-        new Date(`${a.date}T${a.time_slot.split(' - ')[0]}`).getTime() - 
-        new Date(`${b.date}T${b.time_slot.split(' - ')[0]}`).getTime()
-      );
-
-    return upcoming.length > 0 ? upcoming[0] : null;
+        new Date(`${a.scheduledDate}T${a.scheduledTime.split(' - ')[0]}`).getTime() - 
+        new Date(`${b.scheduledDate}T${b.scheduledTime.split(' - ')[0]}`).getTime()
+      )[0];
   };
 
-  return {
-    appointments,
-    isLoading,
-    createAppointment,
-    updateAppointment,
-    cancelAppointment,
+  return { 
+    appointments, 
+    createAppointment, 
+    updateAppointment, 
+    cancelAppointment, 
     getAppointmentById,
-    getUpcomingAppointment
+    getUpcomingAppointment,
+    isLoading 
   };
 };

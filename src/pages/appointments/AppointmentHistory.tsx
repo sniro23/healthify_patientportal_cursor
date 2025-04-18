@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/layout/PageContainer";
@@ -30,7 +29,7 @@ const AppointmentHistory = () => {
   const mapDeliveryMethodToType = (method: string): "audio" | "video" | "text" | "in-person" => {
     switch (method) {
       case "video": return "video";
-      case "chat": return "text"; // Map chat to text as it's expected by AppointmentCard
+      case "Text": return "text"; // Map Text to text as it's expected by AppointmentCard
       case "in-person": return "in-person";
       default: return "text"; // Default fallback
     }
@@ -47,17 +46,17 @@ const AppointmentHistory = () => {
   const now = new Date();
   
   const upcomingAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(`${appointment.date}T${appointment.time_slot.split(' - ')[0]}`);
-    return appointment.status === 'scheduled' && appointmentDate > now;
+    const appointmentDate = new Date(`${appointment.scheduledDate}T${appointment.scheduledTime.split(' - ')[0]}`);
+    return appointment.status === 'Confirmed' && appointmentDate > now;
   });
   
   const pastAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(`${appointment.date}T${appointment.time_slot.split(' - ')[0]}`);
-    return (appointment.status === 'completed' || appointmentDate < now) && appointment.status !== 'cancelled';
+    const appointmentDate = new Date(`${appointment.scheduledDate}T${appointment.scheduledTime.split(' - ')[0]}`);
+    return (appointment.status === 'Completed' || appointmentDate < now) && appointment.status !== 'Cancelled';
   });
   
   const cancelledAppointments = appointments.filter(appointment => 
-    appointment.status === 'cancelled'
+    appointment.status === 'Cancelled'
   );
 
   return (
@@ -97,11 +96,11 @@ const AppointmentHistory = () => {
               <AppointmentCard
                 key={appointment.id}
                 id={appointment.id}
-                doctorName={appointment.provider_type}
+                doctorName={appointment.providerType}
                 specialty={appointment.specialty || ""}
-                date={formatAppointmentDate(appointment.date)}
-                time={appointment.time_slot}
-                type={mapDeliveryMethodToType(appointment.delivery_method)}
+                date={formatAppointmentDate(appointment.scheduledDate)}
+                time={appointment.scheduledTime}
+                type={mapDeliveryMethodToType(appointment.deliveryMethod)}
                 status="upcoming"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />
@@ -120,11 +119,11 @@ const AppointmentHistory = () => {
               <AppointmentCard
                 key={appointment.id}
                 id={appointment.id}
-                doctorName={appointment.provider_type}
+                doctorName={appointment.providerType}
                 specialty={appointment.specialty || ""}
-                date={formatAppointmentDate(appointment.date)}
-                time={appointment.time_slot}
-                type={mapDeliveryMethodToType(appointment.delivery_method)}
+                date={formatAppointmentDate(appointment.scheduledDate)}
+                time={appointment.scheduledTime}
+                type={mapDeliveryMethodToType(appointment.deliveryMethod)}
                 status="completed"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />
@@ -142,11 +141,11 @@ const AppointmentHistory = () => {
               <AppointmentCard
                 key={appointment.id}
                 id={appointment.id}
-                doctorName={appointment.provider_type}
+                doctorName={appointment.providerType}
                 specialty={appointment.specialty || ""}
-                date={formatAppointmentDate(appointment.date)}
-                time={appointment.time_slot}
-                type={mapDeliveryMethodToType(appointment.delivery_method)}
+                date={formatAppointmentDate(appointment.scheduledDate)}
+                time={appointment.scheduledTime}
+                type={mapDeliveryMethodToType(appointment.deliveryMethod)}
                 status="cancelled"
                 onClick={() => navigate(`/appointments/${appointment.id}`)}
               />

@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
+import { SimplifiedCombobox } from "@/components/ui/simplified-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -62,7 +61,7 @@ const NewChatPage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium">Service Type</label>
-            <Combobox
+            <SimplifiedCombobox
               options={serviceTypes}
               value={serviceType}
               onSelect={setServiceType}

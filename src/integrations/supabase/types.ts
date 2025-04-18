@@ -13,44 +13,44 @@ export type Database = {
         Row: {
           consultation_type: string
           created_at: string
-          date: string
+          scheduled_date: string
           delivery_method: string
           id: string
           notes: string | null
           provider_type: string
           specialty: string | null
           status: string
-          time_slot: string
+          scheduled_time: string
           updated_at: string
-          user_id: string
+          patient_id: string
         }
         Insert: {
           consultation_type: string
           created_at?: string
-          date: string
+          scheduled_date: string
           delivery_method: string
           id?: string
           notes?: string | null
           provider_type: string
           specialty?: string | null
           status?: string
-          time_slot: string
+          scheduled_time: string
           updated_at?: string
-          user_id: string
+          patient_id: string
         }
         Update: {
           consultation_type?: string
           created_at?: string
-          date?: string
+          scheduled_date?: string
           delivery_method?: string
           id?: string
           notes?: string | null
           provider_type?: string
           specialty?: string | null
           status?: string
-          time_slot?: string
+          scheduled_time?: string
           updated_at?: string
-          user_id?: string
+          patient_id?: string
         }
         Relationships: []
       }

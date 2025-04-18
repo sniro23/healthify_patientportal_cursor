@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -41,7 +40,8 @@ const mockAppointments = [
     specialty: "General Medicine",
     appointmentType: "Scheduled",
     deliveryMethod: "Video",
-    date: "2025-05-02T10:00:00.000Z",
+    scheduledDate: "2025-05-02",
+    scheduledTime: "10:00 - 10:30",
     duration: 30,
     status: "Upcoming",
     reference: "APPT-345678",
@@ -138,37 +138,40 @@ const mockAppointments = [
 ];
 
 const AppointmentDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const [appointment, setAppointment] = useState<(typeof mockAppointments)[0] | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Find the appointment
+  const appointment = mockAppointments.find(apt => apt.id === id);
+  
+  if (!appointment) {
+    return (
+      <PageContainer title="Appointment Not Found" showBackButton>
+        <div className="text-center py-10">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Appointment Not Found</h2>
+          <p className="text-slate-600 mb-4">The appointment you're looking for doesn't exist or has been cancelled.</p>
+          <Button onClick={() => navigate("/appointments")}>Back to Appointments</Button>
+        </div>
+      </PageContainer>
+    );
+  }
   
   // Format date and time
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      date: format(date, "MMMM d, yyyy"),
-      time: format(date, "h:mm a"),
-      day: format(date, "EEEE")
-    };
-  };
+  const date = format(new Date(appointment.scheduledDate), 'PPP');
+  const time = appointment.scheduledTime;
+  const day = format(new Date(appointment.scheduledDate), 'EEEE');
   
-  // Load appointment details
-  useEffect(() => {
-    // Simulate API call to get appointment details
-    setLoading(true);
-    
-    setTimeout(() => {
-      const foundAppointment = mockAppointments.find(apt => apt.id === id);
-      setAppointment(foundAppointment || null);
-      setLoading(false);
-    }, 500);
-  }, [id]);
+  // Check if appointment is upcoming
+  const isUpcoming = appointment.status === "Upcoming";
   
+  // Check if appointment is within 24 hours
+  const isWithin24Hours = new Date(appointment.scheduledDate).getTime() - Date.now() < 24 * 60 * 60 * 1000;
+
   // Handle starting the consultation
   const startConsultation = () => {
     if (!appointment) return;
@@ -253,7 +256,7 @@ const AppointmentDetails = () => {
     }
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <PageContainer title="Appointment Details" showBackButton={true}>
         <div className="p-8 text-center">
@@ -269,23 +272,6 @@ const AppointmentDetails = () => {
     );
   }
   
-  if (!appointment) {
-    return (
-      <PageContainer title="Appointment Details" showBackButton={true}>
-        <div className="p-8 text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Appointment Not Found</h2>
-          <p className="text-gray-600 mb-6">The appointment you're looking for doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate("/appointments")}>View All Appointments</Button>
-        </div>
-      </PageContainer>
-    );
-  }
-  
-  const { date, time, day } = formatDateTime(appointment.date);
-  const isUpcoming = appointment.status === "Upcoming";
-  const isWithin24Hours = isUpcoming && new Date(appointment.date).getTime() - Date.now() < 24 * 60 * 60 * 1000;
-
   return (
     <PageContainer 
       title="Appointment Details"
@@ -393,7 +379,7 @@ const AppointmentDetails = () => {
                     size="sm" 
                     className="flex-1 sm:flex-none"
                     onClick={startConsultation}
-                    disabled={new Date(appointment.date).getTime() - Date.now() > 10 * 60 * 1000}
+                    disabled={new Date(appointment.scheduledDate).getTime() - Date.now() > 10 * 60 * 1000}
                   >
                     {appointment.deliveryMethod === "Video" ? (
                       <>

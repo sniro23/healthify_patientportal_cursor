@@ -114,12 +114,12 @@ const Dashboard = () => {
         {upcomingAppointment ? (
           <AppointmentCard 
             id={upcomingAppointment.id}
-            doctorName={upcomingAppointment.provider_type}
+            doctorName={upcomingAppointment.providerType}
             specialty={upcomingAppointment.specialty || ""}
-            date={new Date(upcomingAppointment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            time={upcomingAppointment.time_slot}
-            type={upcomingAppointment.delivery_method === "video" ? "video" : 
-                 upcomingAppointment.delivery_method === "chat" ? "text" : "in-person"}
+            date={new Date(upcomingAppointment.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            time={upcomingAppointment.scheduledTime}
+            type={upcomingAppointment.deliveryMethod === "Video" ? "video" : 
+                 upcomingAppointment.deliveryMethod === "Text" ? "text" : "in-person"}
             status="upcoming"
           />
         ) : (

@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Combobox } from "@/components/ui/combobox";
+import { SimplifiedCombobox } from "@/components/ui/simplified-combobox";
 import { 
   ProviderType, 
   ConsultationType,
@@ -31,8 +30,8 @@ const SelectionForm: React.FC<SelectionFormProps> = ({
     <div className="space-y-5">
       <div>
         <label className="text-sm font-medium mb-1 block">Provider Type</label>
-        <Combobox
-          options={providerTypes || []}
+        <SimplifiedCombobox
+          options={providerTypes}
           value={providerType}
           onSelect={(value) => setProviderType(value as ProviderType)}
           placeholder="Select provider type"
@@ -42,8 +41,8 @@ const SelectionForm: React.FC<SelectionFormProps> = ({
       
       <div>
         <label className="text-sm font-medium mb-1 block">Consultation Type</label>
-        <Combobox
-          options={consultationTypes || []}
+        <SimplifiedCombobox
+          options={consultationTypes}
           value={consultationType}
           onSelect={(value) => setConsultationType(value as ConsultationType)}
           placeholder="Select consultation type"
@@ -53,8 +52,8 @@ const SelectionForm: React.FC<SelectionFormProps> = ({
       
       <div>
         <label className="text-sm font-medium mb-1 block">Delivery Method</label>
-        <Combobox
-          options={deliveryMethods || []}
+        <SimplifiedCombobox
+          options={deliveryMethods}
           value={deliveryMethod}
           onSelect={(value) => setDeliveryMethod(value as DeliveryMethod)}
           placeholder="Select delivery method"

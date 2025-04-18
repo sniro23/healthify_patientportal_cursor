@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format, addDays } from "date-fns";
@@ -6,7 +5,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+import { SimplifiedCombobox, ComboboxOption } from "@/components/ui/simplified-combobox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CalendarIcon, Clock, MapPin } from "lucide-react";
@@ -139,7 +138,7 @@ const HomeVisit = () => {
                 <MapPin className="h-4 w-4 mr-1" />
                 Service Area
               </label>
-              <Combobox
+              <SimplifiedCombobox
                 options={serviceAreas}
                 value={serviceArea}
                 onSelect={setServiceArea}

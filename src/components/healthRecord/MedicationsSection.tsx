@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { commonMedications, searchMedications, MedicationOption } from "@/lib/data/medications";
 import { toFhirMedicationStatement } from "@/lib/fhir/types";
-import { Combobox } from "@/components/ui/combobox";
+import { SimplifiedCombobox } from "@/components/ui/simplified-combobox";
 
 interface Medication {
   id: string;
