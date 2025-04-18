@@ -1,4 +1,3 @@
-
 /**
  * FHIR Resource Types
  * Based on FHIR R4 (v4.0.1) standards
@@ -256,13 +255,12 @@ export interface MetricData {
 
 export interface PersonalInfo {
   id?: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
+  full_name: string;
+  age: number;
   gender: string;
-  phone: string;
-  email: string;
-  address?: string;
+  marital_status: string;
+  children: number;
+  address: string;
   city?: string;
   state?: string;
   postalCode?: string;
@@ -278,7 +276,8 @@ export interface VitalsInfo {
   id?: string;
   height: number;
   weight: number;
-  bmi?: number;
+  bmi: number;
+  blood_group: string;
   blood_pressure?: {
     systolic: number;
     diastolic: number;

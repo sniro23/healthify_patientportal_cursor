@@ -9,12 +9,12 @@ export const usePersonalInfo = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
+    full_name: '',
+    age: 0,
     gender: '',
-    phone: '',
-    email: '',
+    marital_status: '',
+    children: 0,
+    address: ''
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,7 +26,6 @@ export const usePersonalInfo = () => {
 
     const fetchPersonalInfo = async () => {
       try {
-        // First try to fetch from health_personal_info table
         const { data, error } = await supabase
           .from('health_personal_info')
           .select('*')
@@ -38,41 +37,13 @@ export const usePersonalInfo = () => {
         } else if (data) {
           setPersonalInfo({
             id: data.id,
-            firstName: data.first_name || '',
-            lastName: data.last_name || '',
-            dateOfBirth: data.date_of_birth || '',
-            gender: data.gender || '',
-            phone: data.phone || '',
-            email: data.email || user.email || '',
-            address: data.address || '',
-            city: data.city || '',
-            state: data.state || '',
-            postalCode: data.postal_code || '',
-            bloodType: data.blood_type || '',
-            emergencyContact: data.emergency_contact ? {
-              name: data.emergency_contact.name || '',
-              phone: data.emergency_contact.phone || '',
-              relationship: data.emergency_contact.relationship || '',
-            } : undefined
+            full_name: data.full_name,
+            age: data.age,
+            gender: data.gender,
+            marital_status: data.marital_status,
+            children: data.children,
+            address: data.address
           });
-        } else {
-          // If no specific health record, try to get basic info from profiles
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .maybeSingle();
-            
-          if (!profileError && profileData) {
-            setPersonalInfo({
-              firstName: profileData.first_name || '',
-              lastName: profileData.last_name || '',
-              dateOfBirth: profileData.date_of_birth || '',
-              gender: profileData.gender || '',
-              phone: profileData.phone || '',
-              email: user.email || '',
-            });
-          }
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -95,23 +66,16 @@ export const usePersonalInfo = () => {
     }
 
     try {
-      // Transform from our interface to match database structure
-      const infoForDb = {
+      const personalInfoForDb = {
         user_id: user.id,
-        first_name: updatedInfo.firstName || personalInfo.firstName,
-        last_name: updatedInfo.lastName || personalInfo.lastName,
-        date_of_birth: updatedInfo.dateOfBirth || personalInfo.dateOfBirth,
+        full_name: updatedInfo.full_name || personalInfo.full_name,
+        age: updatedInfo.age || personalInfo.age,
         gender: updatedInfo.gender || personalInfo.gender,
-        phone: updatedInfo.phone || personalInfo.phone,
-        email: updatedInfo.email || personalInfo.email,
-        address: updatedInfo.address || personalInfo.address,
-        city: updatedInfo.city || personalInfo.city,
-        state: updatedInfo.state || personalInfo.state,
-        postal_code: updatedInfo.postalCode || personalInfo.postalCode,
-        blood_type: updatedInfo.bloodType || personalInfo.bloodType,
-        emergency_contact: updatedInfo.emergencyContact || personalInfo.emergencyContact
+        marital_status: updatedInfo.marital_status || personalInfo.marital_status,
+        children: updatedInfo.children ?? personalInfo.children,
+        address: updatedInfo.address || personalInfo.address
       };
-      
+
       // Check if record exists
       const { data: existingData, error: checkError } = await supabase
         .from('health_personal_info')
@@ -125,16 +89,14 @@ export const usePersonalInfo = () => {
 
       let result;
       if (existingData?.id) {
-        // Update existing record
         result = await supabase
           .from('health_personal_info')
-          .update(infoForDb)
+          .update(personalInfoForDb)
           .eq('id', existingData.id);
       } else {
-        // Insert new record
         result = await supabase
           .from('health_personal_info')
-          .insert(infoForDb);
+          .insert(personalInfoForDb);
       }
 
       if (result.error) {
@@ -151,18 +113,6 @@ export const usePersonalInfo = () => {
         title: "Profile updated",
         description: "Your personal information has been updated"
       });
-      
-      // Also update the basic info in profiles table
-      await supabase
-        .from('profiles')
-        .update({
-          first_name: updatedInfo.firstName || personalInfo.firstName,
-          last_name: updatedInfo.lastName || personalInfo.lastName,
-          date_of_birth: updatedInfo.dateOfBirth || personalInfo.dateOfBirth,
-          gender: updatedInfo.gender || personalInfo.gender,
-          phone: updatedInfo.phone || personalInfo.phone,
-        })
-        .eq('id', user.id);
       
       return true;
     } catch (error) {

@@ -34,9 +34,9 @@ export const useLifestyleInfo = () => {
         } else if (data) {
           setLifestyle({
             id: data.id,
-            activity_level: data.activity_level || "Moderate",
-            smoking_status: data.smoking_status || "Never",
-            alcohol_consumption: data.alcohol_consumption || "Occasionally"
+            activity_level: data.activity_level as "Sedentary" | "Light" | "Moderate" | "Active",
+            smoking_status: data.smoking_status as "Never" | "Former" | "Current",
+            alcohol_consumption: data.alcohol_consumption as "None" | "Occasionally" | "Regularly" | "Frequently"
           });
         }
       } catch (error) {
@@ -60,7 +60,6 @@ export const useLifestyleInfo = () => {
     }
 
     try {
-      // Transform from our interface to match database structure
       const lifestyleForDb = {
         user_id: user.id,
         activity_level: updatedInfo.activity_level || lifestyle.activity_level,
@@ -81,13 +80,11 @@ export const useLifestyleInfo = () => {
 
       let result;
       if (existingData?.id) {
-        // Update existing record
         result = await supabase
           .from('health_lifestyle')
           .update(lifestyleForDb)
           .eq('id', existingData.id);
       } else {
-        // Insert new record
         result = await supabase
           .from('health_lifestyle')
           .insert(lifestyleForDb);
