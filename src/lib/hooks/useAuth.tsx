@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     try {
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           description: error.message,
           variant: 'destructive',
         });
-        return;
+        return false;
       }
 
       toast({
@@ -151,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('hasCompletedProfile', 'false');
       
-      navigate('/profile-setup');
+      return true;
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -159,6 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: 'An unexpected error occurred',
         variant: 'destructive',
       });
+      return false;
     } finally {
       setIsLoading(false);
     }

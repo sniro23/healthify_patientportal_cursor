@@ -1,8 +1,48 @@
 
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/layout/PageContainer";
 import ProfileSetupForm from "@/components/profile/ProfileSetupForm";
+import { useAuth } from "@/lib/hooks/useAuth";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const ProfileSetup = () => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const [pageLoading, setPageLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+      
+      if (!isAuthenticated && !user) {
+        navigate("/login");
+        return;
+      }
+      
+      setPageLoading(false);
+    };
+    
+    if (!isLoading) {
+      checkAuth();
+    }
+  }, [isLoading, user, navigate]);
+
+  if (isLoading || pageLoading) {
+    return (
+      <PageContainer 
+        title="Loading" 
+        showBottomNav={false} 
+        showNotification={false}
+      >
+        <div className="flex justify-center items-center h-[80vh]">
+          <LoadingSpinner />
+        </div>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer 
       title="Profile Setup" 

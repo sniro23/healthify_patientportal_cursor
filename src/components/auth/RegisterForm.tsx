@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ const RegisterForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { signUp, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,11 @@ const RegisterForm = () => {
       return;
     }
     
-    await signUp(email, password);
+    const success = await signUp(email, password);
+    if (success) {
+      // Successfully signed up and authenticated
+      navigate("/profile-setup");
+    }
   };
 
   return (
@@ -78,7 +84,7 @@ const RegisterForm = () => {
         <Button
           variant="link"
           className="p-0 h-auto text-health-primary"
-          onClick={() => window.location.href = "/login"}
+          onClick={() => navigate("/login")}
           type="button"
         >
           Sign in
