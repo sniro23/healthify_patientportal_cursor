@@ -16,14 +16,15 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { useLifestyleInfo } from "@/lib/hooks/useHealthRecord";
+import { useLifestyleInfo } from "@/lib/hooks/useLifestyleInfo";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { LifestyleInfo } from "@/lib/fhir/types";
 
 const LifestyleSection = () => {
   const { lifestyle, updateLifestyleInfo, isLoading } = useLifestyleInfo();
   const [isEditing, setIsEditing] = useState(false);
   
-  const handleSave = async (updatedInfo: Partial<typeof lifestyle>) => {
+  const handleSave = async (updatedInfo: Partial<LifestyleInfo>) => {
     const success = await updateLifestyleInfo(updatedInfo);
     if (success) {
       setIsEditing(false);
@@ -132,10 +133,16 @@ const LifestyleSection = () => {
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
+              
+              // Cast the form values to the correct types
+              const activityLevel = formData.get("activityLevel") as "Sedentary" | "Light" | "Moderate" | "Active";
+              const smokingStatus = formData.get("smokingStatus") as "Never" | "Former" | "Current";
+              const alcoholConsumption = formData.get("alcoholConsumption") as "None" | "Occasionally" | "Regularly" | "Frequently";
+              
               handleSave({
-                activity_level: formData.get("activityLevel") as string,
-                smoking_status: formData.get("smokingStatus") as string,
-                alcohol_consumption: formData.get("alcoholConsumption") as string
+                activity_level: activityLevel,
+                smoking_status: smokingStatus,
+                alcohol_consumption: alcoholConsumption
               });
             }}
           >
